@@ -2,14 +2,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Knowledge Base </title>
-    <link>https://axelknauf.github.io/</link>
+    <link>https://axelknauf.github.io/post/</link>
     <language>en-us</language>
     <author>Axel Knauf</author>
     <rights>(C) 2015</rights>
-    <updated>2015-12-17 12:13:18 &#43;0100 CET</updated>
+    <updated>2015-12-17 09:48:22 &#43;0100 CET</updated>
 
-    
-      
     
       
         <item>
@@ -110,8 +108,6 @@ git cherry-pick -x &amp;lt;hash&amp;gt;
 &lt;/ul&gt;
 </description>
         </item>
-      
-    
       
     
 

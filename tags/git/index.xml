@@ -10,6 +10,105 @@
 
     
       
+        <item>
+          <title>Using Git as SVN client</title>
+          <link>https://axelknauf.github.io/post/git-svn/</link>
+          <pubDate>Thu, 17 Dec 2015 09:48:22 CET</pubDate>
+          <author>Axel Knauf</author>
+          <guid>https://axelknauf.github.io/post/git-svn/</guid>
+          <description>
+
+&lt;h1 id=&#34;git-als-svn-client:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Git als SVN Client&lt;/h1&gt;
+
+&lt;p&gt;Man kann Git als SVN Client nutzen, die Funktionalität wird von Git als &amp;ldquo;git-svn Bridge&amp;rdquo; bereitgestellt. Letztendlich ist es einfach ein Kommando des Git Clients, das mit &lt;code&gt;git svn &amp;lt;command&amp;gt;&lt;/code&gt; aufgerufen werden kann.&lt;/p&gt;
+
+&lt;h2 id=&#34;arbeiten-mit-git-svn:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Arbeiten mit git-svn&lt;/h2&gt;
+
+&lt;h3 id=&#34;checkout-a-k-a-clone:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Checkout a. k. a. Clone&lt;/h3&gt;
+
+&lt;p&gt;Angenommen, Du hast ein SVN Repo unter &lt;a href=&#34;http://svn.example.com/my/repo&#34;&gt;http://svn.example.com/my/repo&lt;/a&gt; mit den Standardpfaden:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://svn.example.com/my/repo/trunk&#34;&gt;http://svn.example.com/my/repo/trunk&lt;/a&gt; - Trunk&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://svn.example.com/my/repo/branches&#34;&gt;http://svn.example.com/my/repo/branches&lt;/a&gt; - SVN Branches&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://svn.example.com/my/repo/tags&#34;&gt;http://svn.example.com/my/repo/tags&lt;/a&gt; - SVN Tags&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Dann kann man auf folfende Art ein lokales Git Repository klonen:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git svn clone --stdlayout &amp;lt;url&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Dieser Prozess kann einige Zeit dauern, da Git ja die komplette History auscheckt und lokal vorhält. Falls das Repository eine sehr lange History hat und man sie nicht vollständig braucht, kann man sie beschränken, indem man den &lt;code&gt;--revisions (-r)&lt;/code&gt; Parameter mitgibt (vgl. Doku unten).&lt;/p&gt;
+
+&lt;p&gt;Danach hat man ein lokales Git Repository, befindet sich im master Branch und kann lokal den gewohnten Git Workflow verwenden, bis auf Ausnahme von push / pull, die hier nicht funktionieren.&lt;/p&gt;
+
+&lt;h3 id=&#34;update-commit:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Update &amp;amp; Commit&lt;/h3&gt;
+
+&lt;p&gt;Statt &lt;code&gt;fetch/merge&lt;/code&gt;, &lt;code&gt;pull&lt;/code&gt; und &lt;code&gt;push&lt;/code&gt; verwendet man bei &lt;code&gt;git-svn&lt;/code&gt; die beiden Kommandos &lt;code&gt;svn rebase&lt;/code&gt; und &lt;code&gt;svn dcommit&lt;/code&gt;. Angenommen, man verwendet den master Branch, um mit dem SVN Repo zu synchronisieren und entwickelt lokal in einem dev Branch, der vom master abzweigt, dann sähe ein üblicher Workflow so aus:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# Ausgangssituation:
+# Man befindet sich im branch &amp;quot;dev&amp;quot;, hier sind neuere Änderungen als im master.
+
+# SVN UPDATE == GIT SVN REBASE
+# Zuerst wechseln wir zum master und holen uns ein SVN Update und aktualisieren damit den &amp;quot;dev&amp;quot; Branch
+git checkout master
+git svn rebase 
+git rebase master dev
+
+# SVN COMMIT == GIT SVN DCOMMIT
+# Jetzt befindet man sich wieder im dev Branch, der ist jetzt up-to-date.
+# Man mergt die eigenen, neueren Commits in master und &amp;quot;pusht&amp;quot; die Änderungen ins SVN Repo, mit dcommit
+git checkout master
+git merge dev
+git svn dcommit
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Wichtig: das hier verwendete &lt;code&gt;git svn rebase&lt;/code&gt; im &lt;code&gt;master&lt;/code&gt; pullt nur die neuen Commits aus dem SVN Trunk, d. h. wenn sich etwas an SVN Branches oder Tags geändert hat, sind diese Änderungen noch nicht im lokalen Git Repo angekommen. Infos zu Branches und Tags folgen unten.&lt;/p&gt;
+
+&lt;h3 id=&#34;arbeiten-mit-svn-branches:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Arbeiten mit SVN Branches&lt;/h3&gt;
+
+&lt;p&gt;Wenn man SVN Branches verwenden will, muss man sie auch im lokalen Git Repo auschecken und verwenden. Der Workflow ist dabei sehr ähnlich zu oben, nur dass man sich vorher die aktuellen Branches und Tags aus dem SVN Repo fetchen muss:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# Alle Branches und Tags mit dem SVN Repo synchronisieren
+git checkout master
+git svn fetch --fetch-all
+
+# SVN Branch auschecken und drin arbeiten
+git checkout -b &amp;lt;neuer-git-branch-name&amp;gt; &amp;lt;remotes/svn-branch-name&amp;gt;
+vi &amp;lt;file&amp;gt;
+git add &amp;lt;file&amp;gt;
+git commit -m &amp;quot;Commit message&amp;quot;
+
+# SVN Update holen, falls sich im SVN Branch etwas geändert hat (sonst schlägt das Commit fehl)
+git svn rebase
+
+# SVN Commit der lokalen Änderungen in den SVN Branch
+git svn dcommit
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Auch hier kann man lokal beliebig Git Branches verwenden.&lt;/p&gt;
+
+&lt;h3 id=&#34;merges-zwischen-trunk-und-branch:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Merges zwischen Trunk und Branch&lt;/h3&gt;
+
+&lt;p&gt;Wenn man Bugfixes o. ä. zwischen den SVN Branches mergen will, kann man auf das übliche Git &lt;code&gt;cherry-pick&lt;/code&gt; zurückgreifen. Wenn man lokal sowohl den master (= SVN Trunk) als auch den SVN Branch vorliegen hat, geht das git-nativ:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# Ziel-SVN-branch auschecken (man verwendet für das checkout den Branch Namen im lokalen Git Repo, der kann anders sein als der Name des Branches im SVN Repo)
+git checkout &amp;lt;git-branch-name&amp;gt;
+git cherry-pick -x &amp;lt;hash&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Der Platzhalter &lt;code&gt;&amp;lt;hash&amp;gt;&lt;/code&gt; bezieht sich dabei auf einen beliebigen Commit im lokalen Git Repo, z. B. einen Fix aus &lt;code&gt;master&lt;/code&gt; / Trunk.&lt;/p&gt;
+
+&lt;h2 id=&#34;links:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Links&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Offizielle Doku: &lt;a href=&#34;https://git-scm.com/docs/git-svn&#34;&gt;https://git-scm.com/docs/git-svn&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Hilfreiche Zusammenfassung: &lt;a href=&#34;https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn&#34;&gt;https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+      
     
 
   </channel>
