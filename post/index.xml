@@ -6,8 +6,142 @@
     <language>en-us</language>
     <author>Axel Knauf</author>
     <rights>(C) 2015</rights>
-    <updated>2015-12-17 09:48:22 &#43;0100 CET</updated>
+    <updated>2015-12-20 20:17:16 &#43;0100 CET</updated>
 
+    
+      
+        <item>
+          <title>Linux snippets</title>
+          <link>https://axelknauf.github.io/post/linux-filesystem-snippets/</link>
+          <pubDate>Sun, 20 Dec 2015 20:17:16 CET</pubDate>
+          <author>Axel Knauf</author>
+          <guid>https://axelknauf.github.io/post/linux-filesystem-snippets/</guid>
+          <description>
+
+&lt;h3 id=&#34;too-many-open-files:39650f4cd9137409ea20052b6865dcd3&#34;&gt;&amp;ldquo;Too many open files&amp;rdquo;&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;check current limit (only valid for executing user): &lt;code&gt;ulimit -a&lt;/code&gt; or specifically &lt;code&gt;ulimit -n&lt;/code&gt; (&lt;code&gt;-n&lt;/code&gt; refers to &amp;ldquo;number of files&amp;rdquo;)&lt;/li&gt;
+&lt;li&gt;set limit with &lt;code&gt;ulimit -n unlimited&lt;/code&gt; or &lt;code&gt;ulimit -n 65535&lt;/code&gt; (may result in &amp;ldquo;permission denied&amp;rdquo;)&lt;/li&gt;
+&lt;li&gt;on Fedora: edit &lt;code&gt;/etc/security/limits.conf&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;list-folders-by-size-descending-recursively:39650f4cd9137409ea20052b6865dcd3&#34;&gt;List folders by size descending recursively&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    find . -type d -exec du -b {} \; | sort -nr | uniq
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;latest-changed-files-one-folder-deep-search:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Latest changed files (one folder deep search)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    find . -maxdepth 2 -type f -exec stat -c %y_%n {} \; | sort -r | less
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;10-latest-changed-files-recursively:39650f4cd9137409ea20052b6865dcd3&#34;&gt;10 latest changed files (recursively)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    find . -type f -printf &#39;%TF_%TT %p \n&#39; | sort -r | head -n 10
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;change-file-encoding-e-g-from-utf-8:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Change file encoding (e. g. from UTF-8)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    recode -f ascii &amp;lt;file&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;use-kernel-prerouting-to-direct-traffic-from-port-80-to-8080-e-g-for-fronting-tomcat:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Use kernel prerouting to direct traffic from port 80 to 8080, e. g. for fronting tomcat&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination :8080
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;repeatedly-serve-a-file-using-netcat-call-with-wget-http-localhost-12345:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Repeatedly serve a file using netcat (call with wget &lt;a href=&#34;http://localhost:12345/&#34;&gt;http://localhost:12345/&lt;/a&gt;)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    #!/bin/bash
+
+    while true
+    do
+      { echo -ne &amp;quot;HTTP/1.0 200 OK\r\nContent-Length: $(wc -c &amp;amp;lt;file.txt)\r\n\r\n&amp;quot;; cat file.txt; } | nc -l 12345
+    done
+
+    exit 0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;apply-htdigest-protection-to-apache-directory:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Apply htdigest protection to Apache directory&lt;/h3&gt;
+
+&lt;h4 id=&#34;required-modules:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Required modules&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mod_authz_user&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mod_auth_digest&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mod_authn_file&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&#34;configuration:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Configuration&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;    &amp;amp;lt;Location /path/to/protect&amp;amp;gt;
+       AuthType Digest
+       AuthName &amp;quot;Protected Area&amp;quot;
+       AuthDigestDomain /path/to/protect http://11.22.33.44/path/to/protect
+       AuthDigestProvider file
+       AuthUserFile /etc/apache2/conf/digest_pw
+       Require valid-user
+    &amp;amp;lt;/Location&amp;amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;create-digest-pw-file:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Create digest_pw file&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;    htdigest -c /etc/apache2/conf/digest_pw &amp;quot;Protected Area&amp;quot; username
+    =&amp;gt; will be asked for password, file created
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;upload-multiple-files-via-ftp-which-is-an-interactive-tool:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Upload multiple files via FTP (which is an interactive tool)&lt;/h3&gt;
+
+&lt;p&gt;Requires curlftpfs and fuse + rsync&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    #!/bin/bash
+
+    SOURCE_DIR=./dist/
+    HOST=some.host.com
+    USER=username
+    PASS=passsword
+    TARGET_DIR=/target/
+    MOUNT_POINT=./mnt/
+    TMP_DIR=$(mktemp -d)
+
+    #########################################################################
+    ## Abort if mount point does not exist
+    if [ ! -d ${MOUNT_POINT} ];
+    then
+      echo &amp;quot;Target mount point directory does not exist, aborting.&amp;quot;
+      exit 1
+    fi
+
+    #########################################################################
+    ## Mount remote file system locally
+    curlftpfs -o user=${USER}:${PASS} ${HOST} ${MOUNT_POINT} || exit 1
+
+    #########################################################################
+    ## Transfer files incrementally
+    if [ -d &amp;quot;${MOUNT_POINT}/${TARGET_DIR}&amp;quot; ]
+    then
+        rsync -rtuv --modify-window=1 --delete --no-perms --size-only --temp-dir=${TMP_DIR} ${SOURCE_DIR}/ ${MOUNT_POINT}/${TARGET_DIR}/
+    else
+        echo &amp;quot;Target remote directory does not exist, aborting.&amp;quot;
+    fi
+
+    #########################################################################
+    ## Unmount remote file system
+    fusermount -u ${MOUNT_POINT}
+
+    #########################################################################
+    ## Remove temporary directory
+    if [ -d &amp;quot;${TMP_DIR}&amp;quot; ];
+    then
+        rm -rf ${TMP_DIR}
+    fi
+
+    exit 0
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        </item>
+      
     
       
         <item>

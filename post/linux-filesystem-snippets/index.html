@@ -9,13 +9,13 @@
 
 
 <meta property="og:type" content="article">
-<meta property="og:title" content="About &middot; Knowledge Base">
+<meta property="og:title" content="Linux snippets &middot; Knowledge Base">
 
 <meta property="og:site_name" content="Knowledge Base">
 
 <title>
     
-    About
+    Linux snippets
     
 </title>
 
@@ -78,21 +78,139 @@
             <header>
                 <div class="post-date">
                     <span class="glyphicon glyphicon-calendar"></span>
-                    <time datetime="Dec 16 2015">
-                        Dec 16 2015
+                    <time datetime="Dec 20 2015">
+                        Dec 20 2015
                     </time>
                 </div>
                 <h1 class="post-title">
-                    <a href="https://axelknauf.github.io/about/">About</a>
+                    <a href="https://axelknauf.github.io/post/linux-filesystem-snippets/">Linux snippets</a>
                 </h1>
             </header>
 
             <div class="post-content">
                 
 
-<h1 id="knowledge-base:6083a88ee3411b0d17ce02d738f69d47">Knowledge Base</h1>
+<h3 id="too-many-open-files:39650f4cd9137409ea20052b6865dcd3">&ldquo;Too many open files&rdquo;</h3>
 
-<p>Hi, my name is Axel and I am collecting bits and pieces on this site. Feel free to browse. And in case you like some of the content, you definitely should follow me on <a href="https://twitter.com/kopfkind">Twitter</a>.</p>
+<ul>
+<li>check current limit (only valid for executing user): <code>ulimit -a</code> or specifically <code>ulimit -n</code> (<code>-n</code> refers to &ldquo;number of files&rdquo;)</li>
+<li>set limit with <code>ulimit -n unlimited</code> or <code>ulimit -n 65535</code> (may result in &ldquo;permission denied&rdquo;)</li>
+<li>on Fedora: edit <code>/etc/security/limits.conf</code></li>
+</ul>
+
+<h3 id="list-folders-by-size-descending-recursively:39650f4cd9137409ea20052b6865dcd3">List folders by size descending recursively</h3>
+
+<pre><code>    find . -type d -exec du -b {} \; | sort -nr | uniq
+</code></pre>
+
+<h3 id="latest-changed-files-one-folder-deep-search:39650f4cd9137409ea20052b6865dcd3">Latest changed files (one folder deep search)</h3>
+
+<pre><code>    find . -maxdepth 2 -type f -exec stat -c %y_%n {} \; | sort -r | less
+</code></pre>
+
+<h3 id="10-latest-changed-files-recursively:39650f4cd9137409ea20052b6865dcd3">10 latest changed files (recursively)</h3>
+
+<pre><code>    find . -type f -printf '%TF_%TT %p \n' | sort -r | head -n 10
+</code></pre>
+
+<h3 id="change-file-encoding-e-g-from-utf-8:39650f4cd9137409ea20052b6865dcd3">Change file encoding (e. g. from UTF-8)</h3>
+
+<pre><code>    recode -f ascii &lt;file&gt;
+</code></pre>
+
+<h3 id="use-kernel-prerouting-to-direct-traffic-from-port-80-to-8080-e-g-for-fronting-tomcat:39650f4cd9137409ea20052b6865dcd3">Use kernel prerouting to direct traffic from port 80 to 8080, e. g. for fronting tomcat</h3>
+
+<pre><code>    iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination :8080
+</code></pre>
+
+<h3 id="repeatedly-serve-a-file-using-netcat-call-with-wget-http-localhost-12345:39650f4cd9137409ea20052b6865dcd3">Repeatedly serve a file using netcat (call with wget <a href="http://localhost:12345/">http://localhost:12345/</a>)</h3>
+
+<pre><code>    #!/bin/bash
+
+    while true
+    do
+      { echo -ne &quot;HTTP/1.0 200 OK\r\nContent-Length: $(wc -c &amp;lt;file.txt)\r\n\r\n&quot;; cat file.txt; } | nc -l 12345
+    done
+
+    exit 0
+</code></pre>
+
+<h3 id="apply-htdigest-protection-to-apache-directory:39650f4cd9137409ea20052b6865dcd3">Apply htdigest protection to Apache directory</h3>
+
+<h4 id="required-modules:39650f4cd9137409ea20052b6865dcd3">Required modules</h4>
+
+<ul>
+<li><code>mod_authz_user</code></li>
+<li><code>mod_auth_digest</code></li>
+<li><code>mod_authn_file</code></li>
+</ul>
+
+<h4 id="configuration:39650f4cd9137409ea20052b6865dcd3">Configuration</h4>
+
+<pre><code>    &amp;lt;Location /path/to/protect&amp;gt;
+       AuthType Digest
+       AuthName &quot;Protected Area&quot;
+       AuthDigestDomain /path/to/protect http://11.22.33.44/path/to/protect
+       AuthDigestProvider file
+       AuthUserFile /etc/apache2/conf/digest_pw
+       Require valid-user
+    &amp;lt;/Location&amp;gt;
+</code></pre>
+
+<h4 id="create-digest-pw-file:39650f4cd9137409ea20052b6865dcd3">Create digest_pw file</h4>
+
+<pre><code>    htdigest -c /etc/apache2/conf/digest_pw &quot;Protected Area&quot; username
+    =&gt; will be asked for password, file created
+</code></pre>
+
+<h3 id="upload-multiple-files-via-ftp-which-is-an-interactive-tool:39650f4cd9137409ea20052b6865dcd3">Upload multiple files via FTP (which is an interactive tool)</h3>
+
+<p>Requires curlftpfs and fuse + rsync</p>
+
+<pre><code>    #!/bin/bash
+
+    SOURCE_DIR=./dist/
+    HOST=some.host.com
+    USER=username
+    PASS=passsword
+    TARGET_DIR=/target/
+    MOUNT_POINT=./mnt/
+    TMP_DIR=$(mktemp -d)
+
+    #########################################################################
+    ## Abort if mount point does not exist
+    if [ ! -d ${MOUNT_POINT} ];
+    then
+      echo &quot;Target mount point directory does not exist, aborting.&quot;
+      exit 1
+    fi
+
+    #########################################################################
+    ## Mount remote file system locally
+    curlftpfs -o user=${USER}:${PASS} ${HOST} ${MOUNT_POINT} || exit 1
+
+    #########################################################################
+    ## Transfer files incrementally
+    if [ -d &quot;${MOUNT_POINT}/${TARGET_DIR}&quot; ]
+    then
+        rsync -rtuv --modify-window=1 --delete --no-perms --size-only --temp-dir=${TMP_DIR} ${SOURCE_DIR}/ ${MOUNT_POINT}/${TARGET_DIR}/
+    else
+        echo &quot;Target remote directory does not exist, aborting.&quot;
+    fi
+
+    #########################################################################
+    ## Unmount remote file system
+    fusermount -u ${MOUNT_POINT}
+
+    #########################################################################
+    ## Remove temporary directory
+    if [ -d &quot;${TMP_DIR}&quot; ];
+    then
+        rm -rf ${TMP_DIR}
+    fi
+
+    exit 0
+</code></pre>
 
             </div>
 
@@ -110,13 +228,13 @@
                     <ul class="pager">
 
                         
-                        <li class="previous"><a href="https://axelknauf.github.io/post/git-svn/"><span aria-hidden="true">&larr;</span> Older</a></li>
+                        <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Older</a></li>
                         
 
                         <li><a href="https://axelknauf.github.io//post">All Posts</a></li>
 
                         
-                        <li class="next disabled"><a href="#">Newer <span aria-hidden="true">&rarr;</span></a></li>
+                        <li class="next"><a href="https://axelknauf.github.io/">Newer <span aria-hidden="true">&rarr;</span></a></li>
                         
 
                     </ul>
