@@ -6,8 +6,258 @@
     <language>en-us</language>
     <author>Axel Knauf</author>
     <rights>(C) 2015</rights>
-    <updated>2015-12-20 20:17:16 &#43;0100 CET</updated>
+    <updated>2015-12-20 20:39:11 &#43;0100 CET</updated>
 
+    
+      
+        <item>
+          <title>oracle admin snippets</title>
+          <link>https://axelknauf.github.io/post/oracle-admin-snippets/</link>
+          <pubDate>Sun, 20 Dec 2015 20:39:11 CET</pubDate>
+          <author>Axel Knauf</author>
+          <guid>https://axelknauf.github.io/post/oracle-admin-snippets/</guid>
+          <description>
+
+&lt;h3 id=&#34;check-for-blocking-locks:d09824b548f82fef46f982c408adadae&#34;&gt;Check for blocking locks&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    select s1.username || &#39;@&#39; || s1.machine
+     || &#39; ( SID=&#39; || s1.sid || &#39; )  is blocking &#39;
+        || s2.username || &#39;@&#39; || s2.machine || &#39; ( SID=&#39; || s2.sid || &#39; ) &#39; AS blocking_status
+        from v$lock l1, v$session s1, v$lock l2, v$session s2
+        where s1.sid=l1.sid and s2.sid=l2.sid
+        and l1.BLOCK=1 and l2.request &amp;gt; 0
+        and l1.id1 = l2.id1
+        and l2.id2 = l2.id2;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;check-kill-user-sessions:d09824b548f82fef46f982c408adadae&#34;&gt;Check / kill user sessions&lt;/h3&gt;
+
+&lt;h4 id=&#34;show-all-sessions:d09824b548f82fef46f982c408adadae&#34;&gt;Show all sessions&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;    select * from v$session;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;session-details:d09824b548f82fef46f982c408adadae&#34;&gt;Session details&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;    SELECT se.osuser,se.username,se.status,se.sid &amp;quot;O-sid&amp;quot;,
+    p.pid &amp;quot;O-pid&amp;quot; ,se.process &amp;quot;user pid&amp;quot;, p.spid &amp;quot;wkg-pid&amp;quot;,
+    to_char(se.logon_time,&#39;MM/DD/YY HH24:MI&#39;) &amp;quot;logon&amp;quot;,se.machine
+    FROM v$session se, v$process p
+    WHERE addr=paddr AND se.osuser IS NOT NULL AND se.username IS NOT NULL
+    ORDER BY se.osuser
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;kill-session-sid-serial-from-v-session-mentioned-above-execute-as-system:d09824b548f82fef46f982c408adadae&#34;&gt;Kill session (sid &amp;amp; serial# from v$session mentioned above, execute as SYSTEM)&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;    ALTER SYSTEM KILL SESSION &#39;sid,serial#&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;kill-session-the-hard-way-parameters-as-above:d09824b548f82fef46f982c408adadae&#34;&gt;Kill session the hard way (parameters as above)&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;    ALTER SYSTEM KILL SESSION &#39;sid,serial#&#39; IMMEDIATE;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;display-sql-for-sql-id:d09824b548f82fef46f982c408adadae&#34;&gt;Display SQL for sql_id&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    -- sql_id can be determined from v$session
+    select * from v$sqlarea where sql_id= &#39;3fmfmpj2kuuf7&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;locked-tables-and-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Locked tables and objects&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    -- Locks by type
+    SELECT session_id,lock_type, mode_held, mode_requested, blocking_others, lock_id1
+    FROM dba_lock l
+    WHERE lock_type NOT IN (&#39;Media Recovery&#39;, &#39;Redo Thread&#39;);
+
+    -- generally locked objects
+    SELECT oracle_username USERNAME, owner OBJECT_OWNER,
+    object_name, object_type, s.osuser,
+    DECODE(l.block,
+      0, &#39;Not Blocking&#39;,
+      1, &#39;Blocking&#39;,
+      2, &#39;Global&#39;) STATUS,
+      DECODE(v.locked_mode,
+        0, &#39;None&#39;,
+        1, &#39;Null&#39;,
+        2, &#39;Row-S (SS)&#39;,
+        3, &#39;Row-X (SX)&#39;,
+        4, &#39;Share&#39;,
+        5, &#39;S/Row-X (SSX)&#39;,
+        6, &#39;Exclusive&#39;, TO_CHAR(lmode)
+      ) MODE_HELD
+    FROM gv$locked_object v, dba_objects d,
+    gv$lock l, gv$session s
+    WHERE v.object_id = d.object_id
+    AND (v.object_id = l.id1)
+    and v.session_id = s.sid
+
+    -- lock details
+    SELECT SUBSTR(TO_CHAR(w.session_id),1,5) WSID, p1.spid WPID,
+      SUBSTR(s1.username,1,12) &amp;quot;WAITING User&amp;quot;,
+      SUBSTR(s1.osuser,1,8) &amp;quot;OS User&amp;quot;,
+      SUBSTR(s1.program,1,20) &amp;quot;WAITING Program&amp;quot;,
+      s1.client_info &amp;quot;WAITING Client&amp;quot;,
+      SUBSTR(TO_CHAR(h.session_id),1,5) HSID, p2.spid HPID,
+      SUBSTR(s2.username,1,12) &amp;quot;HOLDING User&amp;quot;,
+      SUBSTR(s2.osuser,1,8) &amp;quot;OS User&amp;quot;,
+      SUBSTR(s2.program,1,20) &amp;quot;HOLDING Program&amp;quot;,
+      s2.client_info &amp;quot;HOLDING Client&amp;quot;,
+      o.object_name &amp;quot;HOLDING Object&amp;quot;
+    FROM gv$process p1, gv$process p2, gv$session s1,
+      gv$session s2, dba_locks w, dba_locks h, dba_objects o
+    WHERE w.last_convert &amp;gt; 120
+    AND h.mode_held != &#39;None&#39;
+    AND h.mode_held != &#39;Null&#39;
+    AND w.mode_requested != &#39;None&#39;
+    AND s1.row_wait_obj# = o.object_id
+    AND w.lock_type(+) = h.lock_type
+    AND w.lock_id1(+) = h.lock_id1
+    AND w.lock_id2 (+) = h.lock_id2
+    AND w.session_id = s1.sid (+)
+    AND h.session_id = s2.sid (+)
+    AND s1.paddr = p1.addr (+)
+    AND s2.paddr = p2.addr (+)
+    ORDER BY w.last_convert desc;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;tablespace-informations:d09824b548f82fef46f982c408adadae&#34;&gt;Tablespace Informations&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    select
+       fs.tablespace_name                          &amp;quot;Tablespace&amp;quot;,
+       (df.totalspace - fs.freespace)              &amp;quot;Used MB&amp;quot;,
+       fs.freespace                                &amp;quot;Free MB&amp;quot;,
+       df.totalspace                               &amp;quot;Total MB&amp;quot;,
+       round(100 * (fs.freespace / df.totalspace)) &amp;quot;Pct. Free&amp;quot;
+    from
+       (select
+          tablespace_name,
+          round(sum(bytes) / 1048576) TotalSpace
+       from
+          dba_data_files
+       group by
+          tablespace_name
+       ) df,
+       (select
+          tablespace_name,
+          round(sum(bytes) / 1048576) FreeSpace
+       from
+          dba_free_space
+       group by
+          tablespace_name
+       ) fs
+    where
+       df.tablespace_name = fs.tablespace_name;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;table-sizes-for-the-current-schema:d09824b548f82fef46f982c408adadae&#34;&gt;Table sizes for the current schema&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    SET serveroutput ON
+    DECLARE
+      CURSOR tabs
+      IS
+        SELECT object_name FROM user_objects WHERE object_type = &#39;TABLE&#39;;
+      table_size_meg pls_integer := 0;
+    BEGIN
+      FOR t IN tabs
+      LOOP
+        BEGIN
+          SELECT SUM(bytes)/(1024*1024)
+          INTO table_size_meg
+          FROM user_extents
+          WHERE segment_type=&#39;TABLE&#39;
+          AND segment_name  = t.object_name
+          GROUP BY segment_name;
+          dbms_output.put_line(t.object_name || &#39;: &#39; || table_size_meg || &#39; MB&#39;);
+        EXCEPTION
+        WHEN no_data_found THEN
+          dbms_output.put_line(&#39;No data found.&#39;);
+        END;
+      END LOOP;
+    END;
+    /
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;reverse-engineering-of-db-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Reverse Engineering of DB objects&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    select DBMS_METADATA.GET_DDL(&#39;TABLE&#39;,&#39;table_name&#39;) from dual;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;create-db-links:d09824b548f82fef46f982c408adadae&#34;&gt;Create DB links&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    CREATE DATABASE LINK &amp;quot;link_name&amp;quot;
+      CONNECT TO schema_name 
+      IDENTIFIED BY pass
+      USING &#39;tns definition (e. g. from tnsnames.ora)&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;determine-table-size-mb:d09824b548f82fef46f982c408adadae&#34;&gt;Determine table size (MB)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    SELECT
+      segment_name AS table_name,   
+      Sum(bytes)/(1024*1024) table_size_meg
+    FROM user_extents
+    WHERE segment_type=&#39;TABLE&#39;
+    AND segment_name = &#39;table_name&#39;
+    GROUP BY segment_name
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;check-compile-state-of-db-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Check compile state of DB objects&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    SELECT o.object_type, o.object_name
+    FROM user_objects o
+    WHERE o.status &amp;lt;&amp;gt; &#39;VALID&#39;
+    AND o.object_type IN (&#39;VIEW&#39;,&#39;PROCEDURE&#39;,&#39;FUNCTION&#39;,&#39;PACKAGE&#39;,&#39;TRIGGER&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;check-long-operations:d09824b548f82fef46f982c408adadae&#34;&gt;Check long operations&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    SELECT v.sid, se.osuser, se.machine, se.program, v.target, v.opname
+    FROM V$SESSION_LONGOPS v, v$session se
+    WHERE v.sid = se.sid
+    AND v.username = &#39;user_name&#39;
+    ORDER BY se.machine 
+
+    -- determine progress and remaining time
+    SELECT
+      To_Char(Floor(elapsed_seconds / 3600), &#39;FM09&#39;) || &#39;:&#39; || 
+      To_Char(Floor(Mod(elapsed_seconds, 3600) / 60), &#39;FM09&#39;) || &#39;:&#39; || 
+      To_Char(Mod(elapsed_seconds, 60), &#39;FM09&#39;) AS runtime,
+      To_Char(Floor(time_remaining / 3600), &#39;FM09&#39;) || &#39;:&#39; || 
+      To_Char(Floor(Mod(time_remaining, 3600) / 60), &#39;FM09&#39;) || &#39;:&#39; || 
+      To_Char(Mod(time_remaining, 60), &#39;FM09&#39;) AS remaining,
+      To_Char(((sofar / totalwork) * 100), &#39;FM99.99&#39;) || &#39; %&#39; AS done_pct 
+    FROM V$SESSION_LONGOPS v, v$session se
+    WHERE v.sid = se.sid 
+    AND v.target = &#39;schema_name.object_name&#39;
+    AND v.username = &#39;schema_name&#39;
+    AND se.sid = &#39;&amp;lt;sid&amp;gt;&#39;;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;check-where-the-trace-file-for-current-session-is:d09824b548f82fef46f982c408adadae&#34;&gt;Check where the trace file for current session is&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;    select 
+      u_dump.value   || &#39;/&#39;     || 
+      db_name.value  || &#39;_ora_&#39; || 
+      v$process.spid || 
+      nvl2(v$process.traceid,  &#39;_&#39; || v$process.traceid, null ) 
+      || &#39;.trc&#39;  &amp;quot;Trace File&amp;quot;
+    from 
+                 v$parameter u_dump 
+      cross join v$parameter db_name
+      cross join v$process 
+            join v$session 
+              on v$process.addr = v$session.paddr
+    where 
+     u_dump.name   = &#39;user_dump_dest&#39; and 
+     db_name.name  = &#39;db_name&#39;        and
+     v$session.audsid=sys_context(&#39;userenv&#39;,&#39;sessionid&#39;);
+
+    (from http://www.adp-gmbh.ch/ora/misc/find_trace_file.html)
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        </item>
+      
     
       
         <item>
