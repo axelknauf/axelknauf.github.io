@@ -75,14 +75,14 @@
 
 &lt;h4 id=&#34;configuration:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Configuration&lt;/h4&gt;
 
-&lt;pre&gt;&lt;code&gt;    &amp;amp;lt;Location /path/to/protect&amp;amp;gt;
+&lt;pre&gt;&lt;code&gt;    &amp;lt;Location /path/to/protect&amp;gt;
        AuthType Digest
        AuthName &amp;quot;Protected Area&amp;quot;
        AuthDigestDomain /path/to/protect http://11.22.33.44/path/to/protect
        AuthDigestProvider file
        AuthUserFile /etc/apache2/conf/digest_pw
        Require valid-user
-    &amp;amp;lt;/Location&amp;amp;gt;
+    &amp;lt;/Location&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h4 id=&#34;create-digest-pw-file:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Create digest_pw file&lt;/h4&gt;
