@@ -87,6 +87,31 @@
             </time>
         </div>
         <h1 class="post-title">
+            <a href="https://axelknauf.github.io/post/java-throttling-exception-limit/">java throttling exception limit</a>
+        </h1>
+    </header>
+    <div class="post-content">
+        Throttling / rate limiting for requests (or in this case, exceptions) import java.util.Random; import org.junit.Test; public class Bar { private static final long rate = 10L; // ten exceptions allowed private static final long per = 60000L; // per minute (= 12.000 // milliseconds) private static long allowance = rate; private static long last = System.currentTimeMillis(); @Test public void testThresholding() { // Algorithm adapted from: // http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm for (int i = 0; i &lt; 120; i++) { try { businessMethod(); } catch (RuntimeException e) { long time = System.currentTimeMillis(); long passedMs = Math.max(time - last, 1); last = time; double coeff = (double) rate / (double) per; long increment = Math.round(passedMs * coeff); allowance += increment; System.out.printf(&quot;-----------------------------\n&quot;); System.out.printf(&quot;time\t\t:%d\n&quot;, time); System.out.printf(&quot;passed (ms)\t:%d\n&quot;, passedMs); System.out.printf(&quot;increment\t:%d\n&quot;, increment); System.out.printf(&quot;allowance\t:%d\n&quot;, allowance); // Uncomment this block to enable throttling to the // defined rate.
+    </div>
+    <footer class="readon">
+        <a href="https://axelknauf.github.io/post/java-throttling-exception-limit/" class="btn btn-default">
+            READ ON
+        </a>
+    </footer>
+</article>
+<hr>
+
+            
+            
+<article class="post">
+    <header>
+        <div class="post-date">
+            <span class="glyphicon glyphicon-calendar"></span>
+            <time datetime="Dec 20 2015">
+                Dec 20 2015
+            </time>
+        </div>
+        <h1 class="post-title">
             <a href="https://axelknauf.github.io/post/oracle-admin-snippets/">Oracle Administration snippets</a>
         </h1>
     </header>
@@ -172,6 +197,8 @@
                 </div>
                 <div class="list-group">
                     
+                    <a href="/post/java-throttling-exception-limit/" class="list-group-item">java throttling exception limit</a>
+                    
                     <a href="/post/oracle-admin-snippets/" class="list-group-item">Oracle Administration snippets</a>
                     
                     <a href="/post/linux-filesystem-snippets/" class="list-group-item">Linux snippets</a>
@@ -195,6 +222,12 @@
                     
                     
                     
+                    <a href="https://axelknauf.github.io//tags/algorithm" class="list-group-item">
+                        <span class="badge">1</span>
+                        algorithm
+                    </a>
+                    
+                    
                     <a href="https://axelknauf.github.io//tags/dba" class="list-group-item">
                         <span class="badge">1</span>
                         dba
@@ -204,6 +237,12 @@
                     <a href="https://axelknauf.github.io//tags/git" class="list-group-item">
                         <span class="badge">1</span>
                         git
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/java" class="list-group-item">
+                        <span class="badge">1</span>
+                        java
                     </a>
                     
                     

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Knowledge Base </title>
+    <link>https://axelknauf.github.io/tags/algorithm/</link>
+    <language>en-us</language>
+    <author>Axel Knauf</author>
+    <rights>(C) 2015</rights>
+    <updated>2015-12-20 20:44:20 &#43;0100 CET</updated>
+
+    
+      
+        <item>
+          <title>java throttling exception limit</title>
+          <link>https://axelknauf.github.io/post/java-throttling-exception-limit/</link>
+          <pubDate>Sun, 20 Dec 2015 20:44:20 CET</pubDate>
+          <author>Axel Knauf</author>
+          <guid>https://axelknauf.github.io/post/java-throttling-exception-limit/</guid>
+          <description>
+
+&lt;h2 id=&#34;throttling-rate-limiting-for-requests-or-in-this-case-exceptions:2ff4331f2a2cc91639ed40adb8607494&#34;&gt;Throttling / rate limiting for requests (or in this case, exceptions)&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;    import java.util.Random;
+
+    import org.junit.Test;
+
+    public class Bar {
+
+      private static final long rate = 10L; // ten exceptions allowed
+      private static final long per = 60000L; // per minute (= 12.000
+                          // milliseconds)
+      private static long allowance = rate;
+      private static long last = System.currentTimeMillis();
+
+      @Test
+      public void testThresholding() {
+        // Algorithm adapted from:
+        // http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+        for (int i = 0; i &amp;lt; 120; i++) {
+          try {
+            businessMethod();
+          }
+          catch (RuntimeException e) {
+            long time = System.currentTimeMillis();
+            long passedMs = Math.max(time - last, 1);
+            last = time;
+
+            double coeff = (double) rate / (double) per;
+            long increment = Math.round(passedMs * coeff);
+
+            allowance += increment;
+
+            System.out.printf(&amp;quot;-----------------------------\n&amp;quot;);
+            System.out.printf(&amp;quot;time\t\t:%d\n&amp;quot;, time);
+            System.out.printf(&amp;quot;passed (ms)\t:%d\n&amp;quot;, passedMs);
+            System.out.printf(&amp;quot;increment\t:%d\n&amp;quot;, increment);
+            System.out.printf(&amp;quot;allowance\t:%d\n&amp;quot;, allowance);
+
+            // Uncomment this block to enable throttling to the
+            // defined rate.
+            // if (allowance &amp;gt; rate) {
+            // allowance = rate; // throttle
+            // }
+            // System.out.printf(&amp;quot;throttled\t:%d\n&amp;quot;, allowance);
+
+            if (allowance &amp;lt; 1) {
+              System.out.println(&amp;quot;==&amp;gt; too many exceptions!&amp;quot;);
+            }
+            else {
+              System.out.println(&amp;quot;==&amp;gt; still inside the limit.&amp;quot;);
+              allowance--;
+            }
+
+          }
+        }
+      }
+
+      private void businessMethod() {
+        // How many percent of business calls result in an exception
+        final int exceptionPercent = 10;
+
+        System.out.println(&amp;quot;Business method&amp;quot;);
+
+        int val = new Random().nextInt(101);
+        int delay = new Random().nextInt(1001);
+        try {
+          Thread.sleep(delay);
+          if (val &amp;lt;= exceptionPercent) {
+            throw new RuntimeException(&amp;quot;BusinessException&amp;quot;);
+          }
+        }
+        catch (InterruptedException e) {
+          // ignore
+        }
+      }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        </item>
+      
+    
+
+  </channel>
+</rss>

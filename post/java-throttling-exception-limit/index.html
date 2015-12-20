@@ -9,13 +9,13 @@
 
 
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux snippets &middot; Knowledge Base">
+<meta property="og:title" content="java throttling exception limit &middot; Knowledge Base">
 
 <meta property="og:site_name" content="Knowledge Base">
 
 <title>
     
-    Linux snippets
+    java throttling exception limit
     
 </title>
 
@@ -83,133 +83,89 @@
                     </time>
                 </div>
                 <h1 class="post-title">
-                    <a href="https://axelknauf.github.io/post/linux-filesystem-snippets/">Linux snippets</a>
+                    <a href="https://axelknauf.github.io/post/java-throttling-exception-limit/">java throttling exception limit</a>
                 </h1>
             </header>
 
             <div class="post-content">
                 
 
-<h3 id="too-many-open-files:39650f4cd9137409ea20052b6865dcd3">&ldquo;Too many open files&rdquo;</h3>
+<h2 id="throttling-rate-limiting-for-requests-or-in-this-case-exceptions:2ff4331f2a2cc91639ed40adb8607494">Throttling / rate limiting for requests (or in this case, exceptions)</h2>
 
-<ul>
-<li>check current limit (only valid for executing user): <code>ulimit -a</code> or specifically <code>ulimit -n</code> (<code>-n</code> refers to &ldquo;number of files&rdquo;)</li>
-<li>set limit with <code>ulimit -n unlimited</code> or <code>ulimit -n 65535</code> (may result in &ldquo;permission denied&rdquo;)</li>
-<li>on Fedora: edit <code>/etc/security/limits.conf</code></li>
-</ul>
+<pre><code>    import java.util.Random;
 
-<h3 id="list-folders-by-size-descending-recursively:39650f4cd9137409ea20052b6865dcd3">List folders by size descending recursively</h3>
+    import org.junit.Test;
 
-<pre><code>    find . -type d -exec du -b {} \; | sort -nr | uniq
-</code></pre>
+    public class Bar {
 
-<h3 id="latest-changed-files-one-folder-deep-search:39650f4cd9137409ea20052b6865dcd3">Latest changed files (one folder deep search)</h3>
+      private static final long rate = 10L; // ten exceptions allowed
+      private static final long per = 60000L; // per minute (= 12.000
+                          // milliseconds)
+      private static long allowance = rate;
+      private static long last = System.currentTimeMillis();
 
-<pre><code>    find . -maxdepth 2 -type f -exec stat -c %y_%n {} \; | sort -r | less
-</code></pre>
+      @Test
+      public void testThresholding() {
+        // Algorithm adapted from:
+        // http://stackoverflow.com/questions/667508/whats-a-good-rate-limiting-algorithm
+        for (int i = 0; i &lt; 120; i++) {
+          try {
+            businessMethod();
+          }
+          catch (RuntimeException e) {
+            long time = System.currentTimeMillis();
+            long passedMs = Math.max(time - last, 1);
+            last = time;
 
-<h3 id="10-latest-changed-files-recursively:39650f4cd9137409ea20052b6865dcd3">10 latest changed files (recursively)</h3>
+            double coeff = (double) rate / (double) per;
+            long increment = Math.round(passedMs * coeff);
 
-<pre><code>    find . -type f -printf '%TF_%TT %p \n' | sort -r | head -n 10
-</code></pre>
+            allowance += increment;
 
-<h3 id="change-file-encoding-e-g-from-utf-8:39650f4cd9137409ea20052b6865dcd3">Change file encoding (e. g. from UTF-8)</h3>
+            System.out.printf(&quot;-----------------------------\n&quot;);
+            System.out.printf(&quot;time\t\t:%d\n&quot;, time);
+            System.out.printf(&quot;passed (ms)\t:%d\n&quot;, passedMs);
+            System.out.printf(&quot;increment\t:%d\n&quot;, increment);
+            System.out.printf(&quot;allowance\t:%d\n&quot;, allowance);
 
-<pre><code>    recode -f ascii &lt;file&gt;
-</code></pre>
+            // Uncomment this block to enable throttling to the
+            // defined rate.
+            // if (allowance &gt; rate) {
+            // allowance = rate; // throttle
+            // }
+            // System.out.printf(&quot;throttled\t:%d\n&quot;, allowance);
 
-<h3 id="use-kernel-prerouting-to-direct-traffic-from-port-80-to-8080-e-g-for-fronting-tomcat:39650f4cd9137409ea20052b6865dcd3">Use kernel prerouting to direct traffic from port 80 to 8080, e. g. for fronting tomcat</h3>
+            if (allowance &lt; 1) {
+              System.out.println(&quot;==&gt; too many exceptions!&quot;);
+            }
+            else {
+              System.out.println(&quot;==&gt; still inside the limit.&quot;);
+              allowance--;
+            }
 
-<pre><code>    iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination :8080
-</code></pre>
+          }
+        }
+      }
 
-<h3 id="repeatedly-serve-a-file-using-netcat-call-with-wget-http-localhost-12345:39650f4cd9137409ea20052b6865dcd3">Repeatedly serve a file using netcat (call with wget <a href="http://localhost:12345/">http://localhost:12345/</a>)</h3>
+      private void businessMethod() {
+        // How many percent of business calls result in an exception
+        final int exceptionPercent = 10;
 
-<pre><code>    #!/bin/bash
+        System.out.println(&quot;Business method&quot;);
 
-    while true
-    do
-      { echo -ne &quot;HTTP/1.0 200 OK\r\nContent-Length: $(wc -c &amp;lt;file.txt)\r\n\r\n&quot;; cat file.txt; } | nc -l 12345
-    done
-
-    exit 0
-</code></pre>
-
-<h3 id="apply-htdigest-protection-to-apache-directory:39650f4cd9137409ea20052b6865dcd3">Apply htdigest protection to Apache directory</h3>
-
-<h4 id="required-modules:39650f4cd9137409ea20052b6865dcd3">Required modules</h4>
-
-<ul>
-<li><code>mod_authz_user</code></li>
-<li><code>mod_auth_digest</code></li>
-<li><code>mod_authn_file</code></li>
-</ul>
-
-<h4 id="configuration:39650f4cd9137409ea20052b6865dcd3">Configuration</h4>
-
-<pre><code>    &lt;Location /path/to/protect&gt;
-       AuthType Digest
-       AuthName &quot;Protected Area&quot;
-       AuthDigestDomain /path/to/protect http://11.22.33.44/path/to/protect
-       AuthDigestProvider file
-       AuthUserFile /etc/apache2/conf/digest_pw
-       Require valid-user
-    &lt;/Location&gt;
-</code></pre>
-
-<h4 id="create-digest-pw-file:39650f4cd9137409ea20052b6865dcd3">Create digest_pw file</h4>
-
-<pre><code>    htdigest -c /etc/apache2/conf/digest_pw &quot;Protected Area&quot; username
-    =&gt; will be asked for password, file created
-</code></pre>
-
-<h3 id="upload-multiple-files-via-ftp-which-is-an-interactive-tool:39650f4cd9137409ea20052b6865dcd3">Upload multiple files via FTP (which is an interactive tool)</h3>
-
-<p>Requires curlftpfs and fuse + rsync</p>
-
-<pre><code>    #!/bin/bash
-
-    SOURCE_DIR=./dist/
-    HOST=some.host.com
-    USER=username
-    PASS=passsword
-    TARGET_DIR=/target/
-    MOUNT_POINT=./mnt/
-    TMP_DIR=$(mktemp -d)
-
-    #########################################################################
-    ## Abort if mount point does not exist
-    if [ ! -d ${MOUNT_POINT} ];
-    then
-      echo &quot;Target mount point directory does not exist, aborting.&quot;
-      exit 1
-    fi
-
-    #########################################################################
-    ## Mount remote file system locally
-    curlftpfs -o user=${USER}:${PASS} ${HOST} ${MOUNT_POINT} || exit 1
-
-    #########################################################################
-    ## Transfer files incrementally
-    if [ -d &quot;${MOUNT_POINT}/${TARGET_DIR}&quot; ]
-    then
-        rsync -rtuv --modify-window=1 --delete --no-perms --size-only --temp-dir=${TMP_DIR} ${SOURCE_DIR}/ ${MOUNT_POINT}/${TARGET_DIR}/
-    else
-        echo &quot;Target remote directory does not exist, aborting.&quot;
-    fi
-
-    #########################################################################
-    ## Unmount remote file system
-    fusermount -u ${MOUNT_POINT}
-
-    #########################################################################
-    ## Remove temporary directory
-    if [ -d &quot;${TMP_DIR}&quot; ];
-    then
-        rm -rf ${TMP_DIR}
-    fi
-
-    exit 0
+        int val = new Random().nextInt(101);
+        int delay = new Random().nextInt(1001);
+        try {
+          Thread.sleep(delay);
+          if (val &lt;= exceptionPercent) {
+            throw new RuntimeException(&quot;BusinessException&quot;);
+          }
+        }
+        catch (InterruptedException e) {
+          // ignore
+        }
+      }
+    }
 </code></pre>
 
             </div>
@@ -219,9 +175,16 @@
                 <ul class="list-inline post-tags">
                     
                     <li>
-                        <a href="https://axelknauf.github.io//tags/linux">
+                        <a href="https://axelknauf.github.io//tags/java">
                             <i class="fa fa-tags"></i>
-                            linux
+                            java
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://axelknauf.github.io//tags/algorithm">
+                            <i class="fa fa-tags"></i>
+                            algorithm
                         </a>
                     </li>
                     
@@ -235,13 +198,13 @@
                     <ul class="pager">
 
                         
-                        <li class="previous"><a href="https://axelknauf.github.io/post/oracle-admin-snippets/"><span aria-hidden="true">&larr;</span> Older</a></li>
+                        <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Older</a></li>
                         
 
                         <li><a href="https://axelknauf.github.io//post">All Posts</a></li>
 
                         
-                        <li class="next"><a href="https://axelknauf.github.io/">Newer <span aria-hidden="true">&rarr;</span></a></li>
+                        <li class="next"><a href="https://axelknauf.github.io/post/oracle-admin-snippets/">Newer <span aria-hidden="true">&rarr;</span></a></li>
                         
 
                     </ul>
