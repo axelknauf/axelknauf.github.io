@@ -11,12 +11,14 @@
     
       
         <item>
-          <title>Java: throttling exception rate</title>
+          <title>Java: Dynamic Event Throttling</title>
           <link>https://axelknauf.github.io/post/java-throttling-exception-limit/</link>
           <pubDate>Sun, 20 Dec 2015 20:44:20 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/java-throttling-exception-limit/</guid>
           <description>
+
+&lt;p&gt;In the code snippet described below I outline an algorithm for dynamically throttle the number of events occurring. In the example I limit the rate of exceptions being thrown, but theoretically this can be any kind of event, e. g. requests coming from some event source or user.&lt;/p&gt;
 
 &lt;h2 id=&#34;throttling-rate-limiting-for-requests-or-in-this-case-exceptions:2ff4331f2a2cc91639ed40adb8607494&#34;&gt;Throttling / rate limiting for requests (or in this case, exceptions)&lt;/h2&gt;
 

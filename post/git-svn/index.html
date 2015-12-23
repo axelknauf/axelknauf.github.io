@@ -9,13 +9,13 @@
 
 
 <meta property="og:type" content="article">
-<meta property="og:title" content="Git als SVN Client nutzen &middot; Knowledge Base">
+<meta property="og:title" content="Using Git as SVN Client &middot; Knowledge Base">
 
 <meta property="og:site_name" content="Knowledge Base">
 
 <title>
     
-    Git als SVN Client nutzen
+    Using Git as SVN Client
     
 </title>
 
@@ -78,27 +78,25 @@
             <header>
                 <div class="post-date">
                     <span class="glyphicon glyphicon-calendar"></span>
-                    <time datetime="Dec 17 2015">
-                        Dec 17 2015
+                    <time datetime="Dec 18 2015">
+                        Dec 18 2015
                     </time>
                 </div>
                 <h1 class="post-title">
-                    <a href="https://axelknauf.github.io/post/git-svn/">Git als SVN Client nutzen</a>
+                    <a href="https://axelknauf.github.io/post/git-svn/">Using Git as SVN Client</a>
                 </h1>
             </header>
 
             <div class="post-content">
                 
 
-<h1 id="git-als-svn-client:1dcdb17f1cd8847d72134adf129e70ba">Git als SVN Client</h1>
+<p>Using Git as SVN client is quite easy, since the functionality has been built-in already, named the &ldquo;git-svn&rdquo; bridge. It boils down to an additional Git command which can be used in the form <code>git svn &lt;command&gt;</code>.</p>
 
-<p>Man kann Git als SVN Client nutzen, die Funktionalität wird von Git als &ldquo;git-svn Bridge&rdquo; bereitgestellt. Letztendlich ist es einfach ein Kommando des Git Clients, das mit <code>git svn &lt;command&gt;</code> aufgerufen werden kann.</p>
-
-<h2 id="arbeiten-mit-git-svn:1dcdb17f1cd8847d72134adf129e70ba">Arbeiten mit git-svn</h2>
+<h2 id="working-with-git-svn:1dcdb17f1cd8847d72134adf129e70ba">Working with <code>git-svn</code></h2>
 
 <h3 id="checkout-a-k-a-clone:1dcdb17f1cd8847d72134adf129e70ba">Checkout a. k. a. Clone</h3>
 
-<p>Angenommen, Du hast ein SVN Repo unter <a href="http://svn.example.com/my/repo">http://svn.example.com/my/repo</a> mit den Standardpfaden:</p>
+<p>Assuming you have an SVN repo at <a href="http://svn.example.com/my/repo">http://svn.example.com/my/repo</a> with all standard paths:</p>
 
 <ul>
 <li><a href="http://svn.example.com/my/repo/trunk">http://svn.example.com/my/repo/trunk</a> - Trunk</li>
@@ -106,77 +104,84 @@
 <li><a href="http://svn.example.com/my/repo/tags">http://svn.example.com/my/repo/tags</a> - SVN Tags</li>
 </ul>
 
-<p>Dann kann man auf folfende Art ein lokales Git Repository klonen:</p>
+<p>Then you can easily clone the full SVN repo with all its history by running:</p>
 
 <pre><code>git svn clone --stdlayout &lt;url&gt;
 </code></pre>
 
-<p>Dieser Prozess kann einige Zeit dauern, da Git ja die komplette History auscheckt und lokal vorhält. Falls das Repository eine sehr lange History hat und man sie nicht vollständig braucht, kann man sie beschränken, indem man den <code>--revisions (-r)</code> Parameter mitgibt (vgl. Doku unten).</p>
+<p>This process can take some time since Git clones all history to keep it in the local working copy. In case the history is quite large and you do not need all of it, you can limit the checkout to the most recent revisions using the parameter <code>--revisions (-r)</code>.</p>
 
-<p>Danach hat man ein lokales Git Repository, befindet sich im master Branch und kann lokal den gewohnten Git Workflow verwenden, bis auf Ausnahme von push / pull, die hier nicht funktionieren.</p>
+<p>Afterwards you have a local Git repo like usual, you are in the master branch and you can apply any local workflow you are used to - except for <code>push</code> and <code>pull</code>, I will outline their differences below.</p>
 
-<h3 id="update-commit:1dcdb17f1cd8847d72134adf129e70ba">Update &amp; Commit</h3>
+<h3 id="svn-update-commit:1dcdb17f1cd8847d72134adf129e70ba">SVN Update &amp; Commit</h3>
 
-<p>Statt <code>fetch/merge</code>, <code>pull</code> und <code>push</code> verwendet man bei <code>git-svn</code> die beiden Kommandos <code>svn rebase</code> und <code>svn dcommit</code>. Angenommen, man verwendet den master Branch, um mit dem SVN Repo zu synchronisieren und entwickelt lokal in einem dev Branch, der vom master abzweigt, dann sähe ein üblicher Workflow so aus:</p>
+<p>Instead of <code>fetch/merge</code>, <code>pull</code> and <code>push</code>, <code>git-svn</code> uses the two commands <code>svn rebase</code> and <code>svn dcommit</code>. Assuming you use the master branch to synchronize your work with the SVN repo (after the checkout above the SVN remotes should already be configured correctly), a usual workflow may look like this:</p>
 
-<pre><code># Ausgangssituation:
-# Man befindet sich im branch &quot;dev&quot;, hier sind neuere Änderungen als im master.
+<pre><code>    # Starting situation
+    # You are in branch &quot;dev&quot; with newer changes than in &quot;master&quot;
 
-# SVN UPDATE == GIT SVN REBASE
-# Zuerst wechseln wir zum master und holen uns ein SVN Update und aktualisieren damit den &quot;dev&quot; Branch
-git checkout master
-git svn rebase 
-git rebase master dev
+    # SVN UPDATE == GIT SVN REBASE
+    # First, switch to master branch, fetch an SVN update and rebase the &quot;dev&quot; branch
+    git checkout master
+    git svn rebase 
+    git rebase master dev
 
-# SVN COMMIT == GIT SVN DCOMMIT
-# Jetzt befindet man sich wieder im dev Branch, der ist jetzt up-to-date.
-# Man mergt die eigenen, neueren Commits in master und &quot;pusht&quot; die Änderungen ins SVN Repo, mit dcommit
-git checkout master
-git merge dev
-git svn dcommit
+    # SVN COMMIT == GIT SVN DCOMMIT
+    # Now you are back in the &quot;dev&quot; branch (rebase switches the branch automatically)
+    # which is up-to-date with the most recent SVN changes.
+    # Now, simply merge the local changes into master, then commit them into the SVN 
+    # repo using &quot;dcommit&quot;
+    git checkout master
+    git merge dev
+    git svn dcommit
 </code></pre>
 
-<p>Wichtig: das hier verwendete <code>git svn rebase</code> im <code>master</code> pullt nur die neuen Commits aus dem SVN Trunk, d. h. wenn sich etwas an SVN Branches oder Tags geändert hat, sind diese Änderungen noch nicht im lokalen Git Repo angekommen. Infos zu Branches und Tags folgen unten.</p>
+<p>Important: Using <code>git svn rebase</code> in master only pulls changes from SVN trunk, so if there are any new tags or branches in the SVN repo, you will not (yet) see them in you local Git repo. How to use SVN branches and tags is shown below.</p>
 
-<h3 id="arbeiten-mit-svn-branches:1dcdb17f1cd8847d72134adf129e70ba">Arbeiten mit SVN Branches</h3>
+<h3 id="working-with-svn-branches:1dcdb17f1cd8847d72134adf129e70ba">Working with SVN branches</h3>
 
-<p>Wenn man SVN Branches verwenden will, muss man sie auch im lokalen Git Repo auschecken und verwenden. Der Workflow ist dabei sehr ähnlich zu oben, nur dass man sich vorher die aktuellen Branches und Tags aus dem SVN Repo fetchen muss:</p>
+<p>In case you want (or need) to work with SVN branches in your local Git repo, this can be accomplished quite easily. The workflow is similar to above, you only need to fetch the relevant branches from your SVN remote explicitly from the SVN repo.</p>
 
-<pre><code># Alle Branches und Tags mit dem SVN Repo synchronisieren
-git checkout master
-git svn fetch --fetch-all
+<pre><code>    # Synchronize all SVN branches and tags with the local Git repo
+    git checkout master
+    git svn fetch --fetch-all
 
-# SVN Branch auschecken und drin arbeiten
-git checkout -b &lt;neuer-git-branch-name&gt; &lt;remotes/svn-branch-name&gt;
-vi &lt;file&gt;
-git add &lt;file&gt;
-git commit -m &quot;Commit message&quot;
+    # Locally check out the SVN branch as Git branch and work in it
+    git checkout -b &lt;new-git-branch-name&gt; &lt;remotes/svn-branch-name&gt;
+    vi &lt;file&gt;
+    git add &lt;file&gt;
+    git commit -m &quot;Commit message&quot;
 
-# SVN Update holen, falls sich im SVN Branch etwas geändert hat (sonst schlägt das Commit fehl)
-git svn rebase
+    # Fetch SVN updates if any (otherwise commit may fail)
+    git svn rebase
 
-# SVN Commit der lokalen Änderungen in den SVN Branch
-git svn dcommit
+    # Commit all changes from local Git branch to remote SVN repository branch
+    # (dcommit stands for &quot;delta commit&quot;, so the SVN repo will reflect all
+    # commits as you see them in your local Git branch - so it may be a good
+    # idea to cleanup your non-published history with `git rebase -i` before
+    # committing).
+    git svn dcommit
 </code></pre>
 
-<p>Auch hier kann man lokal beliebig Git Branches verwenden.</p>
+<p>You can use all Git magic, branches, merges etc. here as usual.</p>
 
-<h3 id="merges-zwischen-trunk-und-branch:1dcdb17f1cd8847d72134adf129e70ba">Merges zwischen Trunk und Branch</h3>
+<h3 id="merges-between-trunk-and-branch:1dcdb17f1cd8847d72134adf129e70ba">Merges between Trunk and Branch</h3>
 
-<p>Wenn man Bugfixes o. ä. zwischen den SVN Branches mergen will, kann man auf das übliche Git <code>cherry-pick</code> zurückgreifen. Wenn man lokal sowohl den master (= SVN Trunk) als auch den SVN Branch vorliegen hat, geht das git-nativ:</p>
+<p>If you want to merge commits or fixes between SVN branches, you can use <code>git cherry-pick</code> which is a (tremendously) useful tool. Assuming you have a master branch (corresponding to SVN trunk) and another SVN branch locally, then this can be done git-natively:</p>
 
-<pre><code># Ziel-SVN-branch auschecken (man verwendet für das checkout den Branch Namen im lokalen Git Repo, der kann anders sein als der Name des Branches im SVN Repo)
-git checkout &lt;git-branch-name&gt;
-git cherry-pick -x &lt;hash&gt;
+<pre><code>    # Checkout target branch (using the branch name of the local git repo, which may 
+    # deviate from the branch name in the remote SVN repo)
+    git checkout &lt;git-branch-name&gt;
+    git cherry-pick -x &lt;hash&gt;
 </code></pre>
 
-<p>Der Platzhalter <code>&lt;hash&gt;</code> bezieht sich dabei auf einen beliebigen Commit im lokalen Git Repo, z. B. einen Fix aus <code>master</code> / Trunk.</p>
+<p><code>&lt;hash&gt;</code> refers to an arbitrary commit from the local Git repo, e. g. a specific fix from master / trunk.</p>
 
 <h2 id="links:1dcdb17f1cd8847d72134adf129e70ba">Links</h2>
 
 <ul>
-<li>Offizielle Doku: <a href="https://git-scm.com/docs/git-svn">https://git-scm.com/docs/git-svn</a></li>
-<li>Hilfreiche Zusammenfassung: <a href="https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn">https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn</a></li>
+<li>Official docs: <a href="https://git-scm.com/docs/git-svn">https://git-scm.com/docs/git-svn</a></li>
+<li>Useful StackOverflow answer: <a href="https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn">https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn</a></li>
 </ul>
 
             </div>
@@ -209,13 +214,13 @@ git cherry-pick -x &lt;hash&gt;
                     <ul class="pager">
 
                         
-                        <li class="previous"><a href="https://axelknauf.github.io/"><span aria-hidden="true">&larr;</span> Older</a></li>
+                        <li class="previous"><a href="https://axelknauf.github.io/post/linux-filesystem-snippets/"><span aria-hidden="true">&larr;</span> Older</a></li>
                         
 
                         <li><a href="https://axelknauf.github.io//post">All Posts</a></li>
 
                         
-                        <li class="next"><a href="https://axelknauf.github.io/about/">Newer <span aria-hidden="true">&rarr;</span></a></li>
+                        <li class="next"><a href="https://axelknauf.github.io/">Newer <span aria-hidden="true">&rarr;</span></a></li>
                         
 
                     </ul>
@@ -238,15 +243,15 @@ git cherry-pick -x &lt;hash&gt;
                 </div>
                 <div class="list-group">
                     
-                    <a href="/post/java-throttling-exception-limit/" class="list-group-item">Java: throttling exception rate</a>
+                    <a href="/post/java-throttling-exception-limit/" class="list-group-item">Java: Dynamic Event Throttling</a>
                     
-                    <a href="/post/oracle-admin-snippets/" class="list-group-item">Oracle Administration snippets</a>
+                    <a href="/post/oracle-admin-snippets/" class="list-group-item">Oracle Administration Snippets</a>
                     
-                    <a href="/post/linux-filesystem-snippets/" class="list-group-item">Linux snippets</a>
+                    <a href="/post/linux-filesystem-snippets/" class="list-group-item">Linux Snippets</a>
+                    
+                    <a href="/post/git-svn/" class="list-group-item">Using Git as SVN Client</a>
                     
                     <a href="/" class="list-group-item">Welcome</a>
-                    
-                    <a href="/post/git-svn/" class="list-group-item">Git als SVN Client nutzen</a>
                     
                     <a href="/about/" class="list-group-item">About</a>
                     
@@ -320,14 +325,13 @@ git cherry-pick -x &lt;hash&gt;
 <footer class="container copy">
     <p>&copy; 2015  Axel Knauf </p>
 	<p>Powered by <a href="http://gohugo.io" target="_blank">Hugo</a></p>
-	<p>Theme <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://www.facebook.com/daisuke.tsuji.735" target="_blank">Daisuke Tsuji</a></p>
+	<p>Theme <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://twitter.com/dim0627" target="_blank">Daisuke Tsuji</a></p>
 </footer>
 
 <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script src="//yandex.st/highlightjs/8.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-
 
 <script>
 document.write('<script src="//sharebutton.net/plugin/sharebutton.php?type=horizontal&u=' + encodeURIComponent(document.location.href) + '"></scr' + 'ipt>');

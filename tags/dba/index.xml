@@ -11,12 +11,16 @@
     
       
         <item>
-          <title>Oracle Administration snippets</title>
+          <title>Oracle Administration Snippets</title>
           <link>https://axelknauf.github.io/post/oracle-admin-snippets/</link>
           <pubDate>Sun, 20 Dec 2015 20:39:11 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/oracle-admin-snippets/</guid>
           <description>
+
+&lt;p&gt;On this page I am collecting bits and pieces which help with Oracle database administration. I have collected them from over the internet, so thanks a lot to all those people providing these helpful examples. In case you are the author of one of them and would like some credit, please let me know and I will mention the source gladly.&lt;/p&gt;
+
+&lt;h2 id=&#34;locks:d09824b548f82fef46f982c408adadae&#34;&gt;Locks&lt;/h2&gt;
 
 &lt;h3 id=&#34;check-for-blocking-locks:d09824b548f82fef46f982c408adadae&#34;&gt;Check for blocking locks&lt;/h3&gt;
 
@@ -29,6 +33,8 @@
         and l1.id1 = l2.id1
         and l2.id2 = l2.id2;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;sessions:d09824b548f82fef46f982c408adadae&#34;&gt;Sessions&lt;/h2&gt;
 
 &lt;h3 id=&#34;check-kill-user-sessions:d09824b548f82fef46f982c408adadae&#34;&gt;Check / kill user sessions&lt;/h3&gt;
 
@@ -56,6 +62,8 @@
 
 &lt;pre&gt;&lt;code&gt;    ALTER SYSTEM KILL SESSION &#39;sid,serial#&#39; IMMEDIATE;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;sql-statements:d09824b548f82fef46f982c408adadae&#34;&gt;SQL Statements&lt;/h2&gt;
 
 &lt;h3 id=&#34;display-sql-for-sql-id:d09824b548f82fef46f982c408adadae&#34;&gt;Display SQL for sql_id&lt;/h3&gt;
 
@@ -121,6 +129,8 @@
     ORDER BY w.last_convert desc;
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;h2 id=&#34;tablespaces:d09824b548f82fef46f982c408adadae&#34;&gt;Tablespaces&lt;/h2&gt;
+
 &lt;h3 id=&#34;tablespace-informations:d09824b548f82fef46f982c408adadae&#34;&gt;Tablespace Informations&lt;/h3&gt;
 
 &lt;pre&gt;&lt;code&gt;    select
@@ -177,6 +187,8 @@
     END;
     /
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;database-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Database objects&lt;/h2&gt;
 
 &lt;h3 id=&#34;reverse-engineering-of-db-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Reverse Engineering of DB objects&lt;/h3&gt;
 

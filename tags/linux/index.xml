@@ -11,12 +11,16 @@
     
       
         <item>
-          <title>Linux snippets</title>
+          <title>Linux Snippets</title>
           <link>https://axelknauf.github.io/post/linux-filesystem-snippets/</link>
           <pubDate>Sun, 20 Dec 2015 20:17:16 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/linux-filesystem-snippets/</guid>
           <description>
+
+&lt;p&gt;This article collects all kinds of useful tips and tricks around Linux usage, mostly if not all of them about command line tools. Many have been collected over the years, so any advanced user may not find them interesting. But when getting started with the command line, they may still be helpful for new users.&lt;/p&gt;
+
+&lt;h2 id=&#34;common-issues:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Common issues&lt;/h2&gt;
 
 &lt;h3 id=&#34;too-many-open-files:39650f4cd9137409ea20052b6865dcd3&#34;&gt;&amp;ldquo;Too many open files&amp;rdquo;&lt;/h3&gt;
 
@@ -25,6 +29,8 @@
 &lt;li&gt;set limit with &lt;code&gt;ulimit -n unlimited&lt;/code&gt; or &lt;code&gt;ulimit -n 65535&lt;/code&gt; (may result in &amp;ldquo;permission denied&amp;rdquo;)&lt;/li&gt;
 &lt;li&gt;on Fedora: edit &lt;code&gt;/etc/security/limits.conf&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;h2 id=&#34;common-filesystem-tasks:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Common filesystem tasks&lt;/h2&gt;
 
 &lt;h3 id=&#34;list-folders-by-size-descending-recursively:39650f4cd9137409ea20052b6865dcd3&#34;&gt;List folders by size descending recursively&lt;/h3&gt;
 
@@ -45,6 +51,8 @@
 
 &lt;pre&gt;&lt;code&gt;    recode -f ascii &amp;lt;file&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;networking-and-web:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Networking and Web&lt;/h2&gt;
 
 &lt;h3 id=&#34;use-kernel-prerouting-to-direct-traffic-from-port-80-to-8080-e-g-for-fronting-tomcat:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Use kernel prerouting to direct traffic from port 80 to 8080, e. g. for fronting tomcat&lt;/h3&gt;
 

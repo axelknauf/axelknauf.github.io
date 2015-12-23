@@ -82,11 +82,12 @@
             </time>
         </div>
         <h1 class="post-title">
-            <a href="https://axelknauf.github.io/post/linux-filesystem-snippets/">Linux snippets</a>
+            <a href="https://axelknauf.github.io/post/linux-filesystem-snippets/">Linux Snippets</a>
         </h1>
     </header>
     <div class="post-content">
-        &ldquo;Too many open files&rdquo; check current limit (only valid for executing user): ulimit -a or specifically ulimit -n (-n refers to &ldquo;number of files&rdquo;) set limit with ulimit -n unlimited or ulimit -n 65535 (may result in &ldquo;permission denied&rdquo;) on Fedora: edit /etc/security/limits.conf List folders by size descending recursively find . -type d -exec du -b {} \; | sort -nr | uniq Latest changed files (one folder deep search) find .
+        <p>This article collects all kinds of useful tips and tricks around Linux usage, mostly if not all of them about command line tools. Many have been collected over the years, so any advanced user may not find them interesting. But when getting started with the command line, they may still be helpful for new users.</p>
+
     </div>
     <footer class="readon">
         <a href="https://axelknauf.github.io/post/linux-filesystem-snippets/" class="btn btn-default">
@@ -105,14 +106,13 @@
 <footer class="container copy">
     <p>&copy; 2015  Axel Knauf </p>
 	<p>Powered by <a href="http://gohugo.io" target="_blank">Hugo</a></p>
-	<p>Theme <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://www.facebook.com/daisuke.tsuji.735" target="_blank">Daisuke Tsuji</a></p>
+	<p>Theme <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://twitter.com/dim0627" target="_blank">Daisuke Tsuji</a></p>
 </footer>
 
 <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script src="//yandex.st/highlightjs/8.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-
 
 <script>
 document.write('<script src="//sharebutton.net/plugin/sharebutton.php?type=horizontal&u=' + encodeURIComponent(document.location.href) + '"></scr' + 'ipt>');

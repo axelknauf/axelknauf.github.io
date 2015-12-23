@@ -11,12 +11,14 @@
     
       
         <item>
-          <title>Java: throttling exception rate</title>
+          <title>Java: Dynamic Event Throttling</title>
           <link>https://axelknauf.github.io/post/java-throttling-exception-limit/</link>
           <pubDate>Sun, 20 Dec 2015 20:44:20 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/java-throttling-exception-limit/</guid>
           <description>
+
+&lt;p&gt;In the code snippet described below I outline an algorithm for dynamically throttle the number of events occurring. In the example I limit the rate of exceptions being thrown, but theoretically this can be any kind of event, e. g. requests coming from some event source or user.&lt;/p&gt;
 
 &lt;h2 id=&#34;throttling-rate-limiting-for-requests-or-in-this-case-exceptions:2ff4331f2a2cc91639ed40adb8607494&#34;&gt;Throttling / rate limiting for requests (or in this case, exceptions)&lt;/h2&gt;
 
@@ -101,12 +103,16 @@
     
       
         <item>
-          <title>Oracle Administration snippets</title>
+          <title>Oracle Administration Snippets</title>
           <link>https://axelknauf.github.io/post/oracle-admin-snippets/</link>
           <pubDate>Sun, 20 Dec 2015 20:39:11 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/oracle-admin-snippets/</guid>
           <description>
+
+&lt;p&gt;On this page I am collecting bits and pieces which help with Oracle database administration. I have collected them from over the internet, so thanks a lot to all those people providing these helpful examples. In case you are the author of one of them and would like some credit, please let me know and I will mention the source gladly.&lt;/p&gt;
+
+&lt;h2 id=&#34;locks:d09824b548f82fef46f982c408adadae&#34;&gt;Locks&lt;/h2&gt;
 
 &lt;h3 id=&#34;check-for-blocking-locks:d09824b548f82fef46f982c408adadae&#34;&gt;Check for blocking locks&lt;/h3&gt;
 
@@ -119,6 +125,8 @@
         and l1.id1 = l2.id1
         and l2.id2 = l2.id2;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;sessions:d09824b548f82fef46f982c408adadae&#34;&gt;Sessions&lt;/h2&gt;
 
 &lt;h3 id=&#34;check-kill-user-sessions:d09824b548f82fef46f982c408adadae&#34;&gt;Check / kill user sessions&lt;/h3&gt;
 
@@ -146,6 +154,8 @@
 
 &lt;pre&gt;&lt;code&gt;    ALTER SYSTEM KILL SESSION &#39;sid,serial#&#39; IMMEDIATE;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;sql-statements:d09824b548f82fef46f982c408adadae&#34;&gt;SQL Statements&lt;/h2&gt;
 
 &lt;h3 id=&#34;display-sql-for-sql-id:d09824b548f82fef46f982c408adadae&#34;&gt;Display SQL for sql_id&lt;/h3&gt;
 
@@ -211,6 +221,8 @@
     ORDER BY w.last_convert desc;
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;h2 id=&#34;tablespaces:d09824b548f82fef46f982c408adadae&#34;&gt;Tablespaces&lt;/h2&gt;
+
 &lt;h3 id=&#34;tablespace-informations:d09824b548f82fef46f982c408adadae&#34;&gt;Tablespace Informations&lt;/h3&gt;
 
 &lt;pre&gt;&lt;code&gt;    select
@@ -267,6 +279,8 @@
     END;
     /
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;database-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Database objects&lt;/h2&gt;
 
 &lt;h3 id=&#34;reverse-engineering-of-db-objects:d09824b548f82fef46f982c408adadae&#34;&gt;Reverse Engineering of DB objects&lt;/h3&gt;
 
@@ -351,12 +365,16 @@
     
       
         <item>
-          <title>Linux snippets</title>
+          <title>Linux Snippets</title>
           <link>https://axelknauf.github.io/post/linux-filesystem-snippets/</link>
           <pubDate>Sun, 20 Dec 2015 20:17:16 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/linux-filesystem-snippets/</guid>
           <description>
+
+&lt;p&gt;This article collects all kinds of useful tips and tricks around Linux usage, mostly if not all of them about command line tools. Many have been collected over the years, so any advanced user may not find them interesting. But when getting started with the command line, they may still be helpful for new users.&lt;/p&gt;
+
+&lt;h2 id=&#34;common-issues:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Common issues&lt;/h2&gt;
 
 &lt;h3 id=&#34;too-many-open-files:39650f4cd9137409ea20052b6865dcd3&#34;&gt;&amp;ldquo;Too many open files&amp;rdquo;&lt;/h3&gt;
 
@@ -365,6 +383,8 @@
 &lt;li&gt;set limit with &lt;code&gt;ulimit -n unlimited&lt;/code&gt; or &lt;code&gt;ulimit -n 65535&lt;/code&gt; (may result in &amp;ldquo;permission denied&amp;rdquo;)&lt;/li&gt;
 &lt;li&gt;on Fedora: edit &lt;code&gt;/etc/security/limits.conf&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;h2 id=&#34;common-filesystem-tasks:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Common filesystem tasks&lt;/h2&gt;
 
 &lt;h3 id=&#34;list-folders-by-size-descending-recursively:39650f4cd9137409ea20052b6865dcd3&#34;&gt;List folders by size descending recursively&lt;/h3&gt;
 
@@ -385,6 +405,8 @@
 
 &lt;pre&gt;&lt;code&gt;    recode -f ascii &amp;lt;file&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;networking-and-web:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Networking and Web&lt;/h2&gt;
 
 &lt;h3 id=&#34;use-kernel-prerouting-to-direct-traffic-from-port-80-to-8080-e-g-for-fronting-tomcat:39650f4cd9137409ea20052b6865dcd3&#34;&gt;Use kernel prerouting to direct traffic from port 80 to 8080, e. g. for fronting tomcat&lt;/h3&gt;
 
@@ -484,25 +506,21 @@
       
     
       
-    
-      
         <item>
-          <title>Git als SVN Client nutzen</title>
+          <title>Using Git as SVN Client</title>
           <link>https://axelknauf.github.io/post/git-svn/</link>
-          <pubDate>Thu, 17 Dec 2015 09:48:22 CET</pubDate>
+          <pubDate>Fri, 18 Dec 2015 09:48:22 CET</pubDate>
           <author>Axel Knauf</author>
           <guid>https://axelknauf.github.io/post/git-svn/</guid>
           <description>
 
-&lt;h1 id=&#34;git-als-svn-client:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Git als SVN Client&lt;/h1&gt;
+&lt;p&gt;Using Git as SVN client is quite easy, since the functionality has been built-in already, named the &amp;ldquo;git-svn&amp;rdquo; bridge. It boils down to an additional Git command which can be used in the form &lt;code&gt;git svn &amp;lt;command&amp;gt;&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;Man kann Git als SVN Client nutzen, die Funktionalität wird von Git als &amp;ldquo;git-svn Bridge&amp;rdquo; bereitgestellt. Letztendlich ist es einfach ein Kommando des Git Clients, das mit &lt;code&gt;git svn &amp;lt;command&amp;gt;&lt;/code&gt; aufgerufen werden kann.&lt;/p&gt;
-
-&lt;h2 id=&#34;arbeiten-mit-git-svn:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Arbeiten mit git-svn&lt;/h2&gt;
+&lt;h2 id=&#34;working-with-git-svn:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Working with &lt;code&gt;git-svn&lt;/code&gt;&lt;/h2&gt;
 
 &lt;h3 id=&#34;checkout-a-k-a-clone:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Checkout a. k. a. Clone&lt;/h3&gt;
 
-&lt;p&gt;Angenommen, Du hast ein SVN Repo unter &lt;a href=&#34;http://svn.example.com/my/repo&#34;&gt;http://svn.example.com/my/repo&lt;/a&gt; mit den Standardpfaden:&lt;/p&gt;
+&lt;p&gt;Assuming you have an SVN repo at &lt;a href=&#34;http://svn.example.com/my/repo&#34;&gt;http://svn.example.com/my/repo&lt;/a&gt; with all standard paths:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;http://svn.example.com/my/repo/trunk&#34;&gt;http://svn.example.com/my/repo/trunk&lt;/a&gt; - Trunk&lt;/li&gt;
@@ -510,80 +528,89 @@
 &lt;li&gt;&lt;a href=&#34;http://svn.example.com/my/repo/tags&#34;&gt;http://svn.example.com/my/repo/tags&lt;/a&gt; - SVN Tags&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Dann kann man auf folfende Art ein lokales Git Repository klonen:&lt;/p&gt;
+&lt;p&gt;Then you can easily clone the full SVN repo with all its history by running:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;git svn clone --stdlayout &amp;lt;url&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Dieser Prozess kann einige Zeit dauern, da Git ja die komplette History auscheckt und lokal vorhält. Falls das Repository eine sehr lange History hat und man sie nicht vollständig braucht, kann man sie beschränken, indem man den &lt;code&gt;--revisions (-r)&lt;/code&gt; Parameter mitgibt (vgl. Doku unten).&lt;/p&gt;
+&lt;p&gt;This process can take some time since Git clones all history to keep it in the local working copy. In case the history is quite large and you do not need all of it, you can limit the checkout to the most recent revisions using the parameter &lt;code&gt;--revisions (-r)&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;Danach hat man ein lokales Git Repository, befindet sich im master Branch und kann lokal den gewohnten Git Workflow verwenden, bis auf Ausnahme von push / pull, die hier nicht funktionieren.&lt;/p&gt;
+&lt;p&gt;Afterwards you have a local Git repo like usual, you are in the master branch and you can apply any local workflow you are used to - except for &lt;code&gt;push&lt;/code&gt; and &lt;code&gt;pull&lt;/code&gt;, I will outline their differences below.&lt;/p&gt;
 
-&lt;h3 id=&#34;update-commit:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Update &amp;amp; Commit&lt;/h3&gt;
+&lt;h3 id=&#34;svn-update-commit:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;SVN Update &amp;amp; Commit&lt;/h3&gt;
 
-&lt;p&gt;Statt &lt;code&gt;fetch/merge&lt;/code&gt;, &lt;code&gt;pull&lt;/code&gt; und &lt;code&gt;push&lt;/code&gt; verwendet man bei &lt;code&gt;git-svn&lt;/code&gt; die beiden Kommandos &lt;code&gt;svn rebase&lt;/code&gt; und &lt;code&gt;svn dcommit&lt;/code&gt;. Angenommen, man verwendet den master Branch, um mit dem SVN Repo zu synchronisieren und entwickelt lokal in einem dev Branch, der vom master abzweigt, dann sähe ein üblicher Workflow so aus:&lt;/p&gt;
+&lt;p&gt;Instead of &lt;code&gt;fetch/merge&lt;/code&gt;, &lt;code&gt;pull&lt;/code&gt; and &lt;code&gt;push&lt;/code&gt;, &lt;code&gt;git-svn&lt;/code&gt; uses the two commands &lt;code&gt;svn rebase&lt;/code&gt; and &lt;code&gt;svn dcommit&lt;/code&gt;. Assuming you use the master branch to synchronize your work with the SVN repo (after the checkout above the SVN remotes should already be configured correctly), a usual workflow may look like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;# Ausgangssituation:
-# Man befindet sich im branch &amp;quot;dev&amp;quot;, hier sind neuere Änderungen als im master.
+&lt;pre&gt;&lt;code&gt;    # Starting situation
+    # You are in branch &amp;quot;dev&amp;quot; with newer changes than in &amp;quot;master&amp;quot;
 
-# SVN UPDATE == GIT SVN REBASE
-# Zuerst wechseln wir zum master und holen uns ein SVN Update und aktualisieren damit den &amp;quot;dev&amp;quot; Branch
-git checkout master
-git svn rebase 
-git rebase master dev
+    # SVN UPDATE == GIT SVN REBASE
+    # First, switch to master branch, fetch an SVN update and rebase the &amp;quot;dev&amp;quot; branch
+    git checkout master
+    git svn rebase 
+    git rebase master dev
 
-# SVN COMMIT == GIT SVN DCOMMIT
-# Jetzt befindet man sich wieder im dev Branch, der ist jetzt up-to-date.
-# Man mergt die eigenen, neueren Commits in master und &amp;quot;pusht&amp;quot; die Änderungen ins SVN Repo, mit dcommit
-git checkout master
-git merge dev
-git svn dcommit
+    # SVN COMMIT == GIT SVN DCOMMIT
+    # Now you are back in the &amp;quot;dev&amp;quot; branch (rebase switches the branch automatically)
+    # which is up-to-date with the most recent SVN changes.
+    # Now, simply merge the local changes into master, then commit them into the SVN 
+    # repo using &amp;quot;dcommit&amp;quot;
+    git checkout master
+    git merge dev
+    git svn dcommit
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Wichtig: das hier verwendete &lt;code&gt;git svn rebase&lt;/code&gt; im &lt;code&gt;master&lt;/code&gt; pullt nur die neuen Commits aus dem SVN Trunk, d. h. wenn sich etwas an SVN Branches oder Tags geändert hat, sind diese Änderungen noch nicht im lokalen Git Repo angekommen. Infos zu Branches und Tags folgen unten.&lt;/p&gt;
+&lt;p&gt;Important: Using &lt;code&gt;git svn rebase&lt;/code&gt; in master only pulls changes from SVN trunk, so if there are any new tags or branches in the SVN repo, you will not (yet) see them in you local Git repo. How to use SVN branches and tags is shown below.&lt;/p&gt;
 
-&lt;h3 id=&#34;arbeiten-mit-svn-branches:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Arbeiten mit SVN Branches&lt;/h3&gt;
+&lt;h3 id=&#34;working-with-svn-branches:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Working with SVN branches&lt;/h3&gt;
 
-&lt;p&gt;Wenn man SVN Branches verwenden will, muss man sie auch im lokalen Git Repo auschecken und verwenden. Der Workflow ist dabei sehr ähnlich zu oben, nur dass man sich vorher die aktuellen Branches und Tags aus dem SVN Repo fetchen muss:&lt;/p&gt;
+&lt;p&gt;In case you want (or need) to work with SVN branches in your local Git repo, this can be accomplished quite easily. The workflow is similar to above, you only need to fetch the relevant branches from your SVN remote explicitly from the SVN repo.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;# Alle Branches und Tags mit dem SVN Repo synchronisieren
-git checkout master
-git svn fetch --fetch-all
+&lt;pre&gt;&lt;code&gt;    # Synchronize all SVN branches and tags with the local Git repo
+    git checkout master
+    git svn fetch --fetch-all
 
-# SVN Branch auschecken und drin arbeiten
-git checkout -b &amp;lt;neuer-git-branch-name&amp;gt; &amp;lt;remotes/svn-branch-name&amp;gt;
-vi &amp;lt;file&amp;gt;
-git add &amp;lt;file&amp;gt;
-git commit -m &amp;quot;Commit message&amp;quot;
+    # Locally check out the SVN branch as Git branch and work in it
+    git checkout -b &amp;lt;new-git-branch-name&amp;gt; &amp;lt;remotes/svn-branch-name&amp;gt;
+    vi &amp;lt;file&amp;gt;
+    git add &amp;lt;file&amp;gt;
+    git commit -m &amp;quot;Commit message&amp;quot;
 
-# SVN Update holen, falls sich im SVN Branch etwas geändert hat (sonst schlägt das Commit fehl)
-git svn rebase
+    # Fetch SVN updates if any (otherwise commit may fail)
+    git svn rebase
 
-# SVN Commit der lokalen Änderungen in den SVN Branch
-git svn dcommit
+    # Commit all changes from local Git branch to remote SVN repository branch
+    # (dcommit stands for &amp;quot;delta commit&amp;quot;, so the SVN repo will reflect all
+    # commits as you see them in your local Git branch - so it may be a good
+    # idea to cleanup your non-published history with `git rebase -i` before
+    # committing).
+    git svn dcommit
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Auch hier kann man lokal beliebig Git Branches verwenden.&lt;/p&gt;
+&lt;p&gt;You can use all Git magic, branches, merges etc. here as usual.&lt;/p&gt;
 
-&lt;h3 id=&#34;merges-zwischen-trunk-und-branch:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Merges zwischen Trunk und Branch&lt;/h3&gt;
+&lt;h3 id=&#34;merges-between-trunk-and-branch:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Merges between Trunk and Branch&lt;/h3&gt;
 
-&lt;p&gt;Wenn man Bugfixes o. ä. zwischen den SVN Branches mergen will, kann man auf das übliche Git &lt;code&gt;cherry-pick&lt;/code&gt; zurückgreifen. Wenn man lokal sowohl den master (= SVN Trunk) als auch den SVN Branch vorliegen hat, geht das git-nativ:&lt;/p&gt;
+&lt;p&gt;If you want to merge commits or fixes between SVN branches, you can use &lt;code&gt;git cherry-pick&lt;/code&gt; which is a (tremendously) useful tool. Assuming you have a master branch (corresponding to SVN trunk) and another SVN branch locally, then this can be done git-natively:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;# Ziel-SVN-branch auschecken (man verwendet für das checkout den Branch Namen im lokalen Git Repo, der kann anders sein als der Name des Branches im SVN Repo)
-git checkout &amp;lt;git-branch-name&amp;gt;
-git cherry-pick -x &amp;lt;hash&amp;gt;
+&lt;pre&gt;&lt;code&gt;    # Checkout target branch (using the branch name of the local git repo, which may 
+    # deviate from the branch name in the remote SVN repo)
+    git checkout &amp;lt;git-branch-name&amp;gt;
+    git cherry-pick -x &amp;lt;hash&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Der Platzhalter &lt;code&gt;&amp;lt;hash&amp;gt;&lt;/code&gt; bezieht sich dabei auf einen beliebigen Commit im lokalen Git Repo, z. B. einen Fix aus &lt;code&gt;master&lt;/code&gt; / Trunk.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;hash&amp;gt;&lt;/code&gt; refers to an arbitrary commit from the local Git repo, e. g. a specific fix from master / trunk.&lt;/p&gt;
 
 &lt;h2 id=&#34;links:1dcdb17f1cd8847d72134adf129e70ba&#34;&gt;Links&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Offizielle Doku: &lt;a href=&#34;https://git-scm.com/docs/git-svn&#34;&gt;https://git-scm.com/docs/git-svn&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Hilfreiche Zusammenfassung: &lt;a href=&#34;https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn&#34;&gt;https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Official docs: &lt;a href=&#34;https://git-scm.com/docs/git-svn&#34;&gt;https://git-scm.com/docs/git-svn&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Useful StackOverflow answer: &lt;a href=&#34;https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn&#34;&gt;https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
         </item>
+      
+    
       
     
       

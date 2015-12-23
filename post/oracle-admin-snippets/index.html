@@ -9,13 +9,13 @@
 
 
 <meta property="og:type" content="article">
-<meta property="og:title" content="Oracle Administration snippets &middot; Knowledge Base">
+<meta property="og:title" content="Oracle Administration Snippets &middot; Knowledge Base">
 
 <meta property="og:site_name" content="Knowledge Base">
 
 <title>
     
-    Oracle Administration snippets
+    Oracle Administration Snippets
     
 </title>
 
@@ -83,12 +83,16 @@
                     </time>
                 </div>
                 <h1 class="post-title">
-                    <a href="https://axelknauf.github.io/post/oracle-admin-snippets/">Oracle Administration snippets</a>
+                    <a href="https://axelknauf.github.io/post/oracle-admin-snippets/">Oracle Administration Snippets</a>
                 </h1>
             </header>
 
             <div class="post-content">
                 
+
+<p>On this page I am collecting bits and pieces which help with Oracle database administration. I have collected them from over the internet, so thanks a lot to all those people providing these helpful examples. In case you are the author of one of them and would like some credit, please let me know and I will mention the source gladly.</p>
+
+<h2 id="locks:d09824b548f82fef46f982c408adadae">Locks</h2>
 
 <h3 id="check-for-blocking-locks:d09824b548f82fef46f982c408adadae">Check for blocking locks</h3>
 
@@ -101,6 +105,8 @@
         and l1.id1 = l2.id1
         and l2.id2 = l2.id2;
 </code></pre>
+
+<h2 id="sessions:d09824b548f82fef46f982c408adadae">Sessions</h2>
 
 <h3 id="check-kill-user-sessions:d09824b548f82fef46f982c408adadae">Check / kill user sessions</h3>
 
@@ -128,6 +134,8 @@
 
 <pre><code>    ALTER SYSTEM KILL SESSION 'sid,serial#' IMMEDIATE;
 </code></pre>
+
+<h2 id="sql-statements:d09824b548f82fef46f982c408adadae">SQL Statements</h2>
 
 <h3 id="display-sql-for-sql-id:d09824b548f82fef46f982c408adadae">Display SQL for sql_id</h3>
 
@@ -193,6 +201,8 @@
     ORDER BY w.last_convert desc;
 </code></pre>
 
+<h2 id="tablespaces:d09824b548f82fef46f982c408adadae">Tablespaces</h2>
+
 <h3 id="tablespace-informations:d09824b548f82fef46f982c408adadae">Tablespace Informations</h3>
 
 <pre><code>    select
@@ -249,6 +259,8 @@
     END;
     /
 </code></pre>
+
+<h2 id="database-objects:d09824b548f82fef46f982c408adadae">Database objects</h2>
 
 <h3 id="reverse-engineering-of-db-objects:d09824b548f82fef46f982c408adadae">Reverse Engineering of DB objects</h3>
 
@@ -387,15 +399,15 @@
                 </div>
                 <div class="list-group">
                     
-                    <a href="/post/java-throttling-exception-limit/" class="list-group-item">Java: throttling exception rate</a>
+                    <a href="/post/java-throttling-exception-limit/" class="list-group-item">Java: Dynamic Event Throttling</a>
                     
-                    <a href="/post/oracle-admin-snippets/" class="list-group-item">Oracle Administration snippets</a>
+                    <a href="/post/oracle-admin-snippets/" class="list-group-item">Oracle Administration Snippets</a>
                     
-                    <a href="/post/linux-filesystem-snippets/" class="list-group-item">Linux snippets</a>
+                    <a href="/post/linux-filesystem-snippets/" class="list-group-item">Linux Snippets</a>
+                    
+                    <a href="/post/git-svn/" class="list-group-item">Using Git as SVN Client</a>
                     
                     <a href="/" class="list-group-item">Welcome</a>
-                    
-                    <a href="/post/git-svn/" class="list-group-item">Git als SVN Client nutzen</a>
                     
                     <a href="/about/" class="list-group-item">About</a>
                     
@@ -469,14 +481,13 @@
 <footer class="container copy">
     <p>&copy; 2015  Axel Knauf </p>
 	<p>Powered by <a href="http://gohugo.io" target="_blank">Hugo</a></p>
-	<p>Theme <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://www.facebook.com/daisuke.tsuji.735" target="_blank">Daisuke Tsuji</a></p>
+	<p>Theme <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://twitter.com/dim0627" target="_blank">Daisuke Tsuji</a></p>
 </footer>
 
 <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 <script src="//yandex.st/highlightjs/8.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-
 
 <script>
 document.write('<script src="//sharebutton.net/plugin/sharebutton.php?type=horizontal&u=' + encodeURIComponent(document.location.href) + '"></scr' + 'ipt>');
