@@ -6,8 +6,114 @@
     <language>en-us</language>
     <author>Axel Knauf</author>
     <rights>(C) 2015</rights>
-    <updated>2015-07-20 20:17:16 &#43;0100 &#43;0100</updated>
+    <updated>2015-12-27 11:53:23 &#43;0100 CET</updated>
 
+    
+      
+        <item>
+          <title>Linux: keeping files in sync with unison</title>
+          <link>https://axelknauf.github.io/post/linux-unison-synchronization/</link>
+          <pubDate>Sun, 27 Dec 2015 11:53:23 CET</pubDate>
+          <author>Axel Knauf</author>
+          <guid>https://axelknauf.github.io/post/linux-unison-synchronization/</guid>
+          <description>
+
+&lt;p&gt;In this post I would like to describe how to keep files in sync across two (or more) computers using a central storage and the useful tool &lt;code&gt;unison&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;preparations:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Preparations&lt;/h2&gt;
+
+&lt;p&gt;In order to synchronize files across machines, you need the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;a folder on each machine which shall serve as synchronization point&lt;/li&gt;
+&lt;li&gt;a central storage, e. g. an SMB file share or some similar storage (may be SSH, ..)&lt;/li&gt;
+&lt;li&gt;the relevant software on each machine, details below&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;required-software:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Required Software&lt;/h3&gt;
+
+&lt;p&gt;I am running Ubuntu 15.10 on each machine, but the packages required are available for many distros, so this may easily work for you.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    sudo apt-get install cifs-utils unison-gtk
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I am using &lt;code&gt;cifs-utils&lt;/code&gt; to locally mount a centrally-shared SMB drive (actually a USB thumb drive plugged into my Fritz Box and shared via SMBFS from there).&lt;/p&gt;
+
+&lt;h2 id=&#34;setting-up-cifs:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Setting up CIFS&lt;/h2&gt;
+
+&lt;p&gt;In order to be able to locally mount the SMB share you first need to make it available on your host. Im my case - I am using a Fritz Box - this was quite easy, I will not write about this here. After having made it available on the network, you can mount it locally using these steps (derived from &lt;a href=&#34;http://askubuntu.com/a/157140&#34;&gt;this answer&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;First, create a credentials file in your home folder:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    vim ~/.smbcredentials
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Put your configuration settings in there:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    username=username
+    password=secret_password
+    domain=workgroup_name
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Make sure the file is only readable by your own user:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    chmod 600 ~/.smbcredentials
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then, create a mount point where you want to have it available on your machine:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    sudo mkdir /media/shared
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Having set up the SMB credentials and the mount point, you can add the file share to your &lt;code&gt;/etc/fstab&lt;/code&gt; so it gets automatically mounted each time you boot:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    sudoedit /etc/fstab
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add a line similar to the following - you will have to adjust the values to fit your own paths and UID/GID. If you are unsure about the IDs, check the output of &lt;code&gt;id&lt;/code&gt; for your user:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    //server/share-name /media/shared cifs credentials=/home/username/.smbcredentials,uid=1000,gid=1000 0 0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If all pieces fit together you can now mount the share with&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    sudo mount -a
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now you have the remote folder mounted locally. Next we create a local folder in your home which shall be kept in sync with the remote one:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    mkdir ~/shared
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;setting-up-unison:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Setting up &lt;code&gt;unison&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Setting up unison is straight-forward. Usually being a CLI user, I went for the GTK UI this time. If your have not run unison before, it will automatically launch the new profile wizard to guide you through the process. Create a new profile, choose &lt;code&gt;~/shared&lt;/code&gt; as first folder, then &lt;code&gt;/media/shared&lt;/code&gt; as second folder and make sure to check the box for FAT FS compatibility, since the SMB share does not know about unix permissions and will yield errors if you omit it. In case you do, simple re-create the profile with the correct settings this time.&lt;/p&gt;
+
+&lt;p&gt;After having created the profile, unison will attempt an initial synchronization. You will get a warning message telling that there have been no archive folders, yet. This is okay, they are created when you first run unison and trigger the synchronization.&lt;/p&gt;
+
+&lt;p&gt;As result of the first synchroniation, &lt;code&gt;unison&lt;/code&gt; will tell you about the differences, before anything happens. You can review the list of actions and if all is well, simple click on the &amp;ldquo;Go!&amp;rdquo; button to start the synchronization. During the first synch, it may well take some time, depending on the amount of data transferred and your network connection speed.&lt;/p&gt;
+
+&lt;h2 id=&#34;adding-a-second-machine:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Adding a second machine&lt;/h2&gt;
+
+&lt;p&gt;Adding a second machine to synchronize looks identical to the first. You install the software, set up the SMB mount, configure unison and let it run. However, there may be different results depending on the starting conditions.&lt;/p&gt;
+
+&lt;p&gt;If the second machine did not have any files previously, &lt;code&gt;unison&lt;/code&gt; will download everything initially, and you are fine. In case you already had a - mostly identical - copy of the shared files locally, &lt;code&gt;unison&lt;/code&gt; may present you with a list of changed / updated files and you can choose how to synchronize them.&lt;/p&gt;
+
+&lt;h2 id=&#34;synchronization-strategies:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Synchronization Strategies&lt;/h2&gt;
+
+&lt;p&gt;As described in &lt;a href=&#34;http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html&#34;&gt;the official documentation&lt;/a&gt;, the best strategy to keep multiple machines in sync is to set up a spokes-and-hub network. This means that each client machine synchronizes with a central hub, much like many centrally managed SCMs work. Unison itself only supports two-node-synchronization, but running a central server like the SMB share above, solves this issue easily.&lt;/p&gt;
+
+&lt;p&gt;I hope this guide was useful. Happy hacking!&lt;/p&gt;
+
+&lt;h2 id=&#34;links-and-docs:a6b9c1d3f6fa980bc7d7be7beaa2d553&#34;&gt;Links and docs&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Official homepage: &lt;a href=&#34;http://www.cis.upenn.edu/~bcpierce/unison/docs.html&#34;&gt;http://www.cis.upenn.edu/~bcpierce/unison/docs.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Documentation below: &lt;a href=&#34;http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html&#34;&gt;http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+      
     
       
         <item>
