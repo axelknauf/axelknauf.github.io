@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<meta property="og:url" content="https://axelknauf.github.io/">
+
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux: Self-signed certificate for Apache SSL &middot; Knowledge Base">
+
+<meta property="og:site_name" content="Knowledge Base">
+
+<title>
+    
+    Linux: Self-signed certificate for Apache SSL
+    
+</title>
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
+<link rel="stylesheet" href="https://axelknauf.github.io//css/styles.css">
+<link rel="stylesheet" href="https://axelknauf.github.io//css/custom.css">
+
+
+<link rel="shortcut icon" href="https://axelknauf.github.io//assets/favicon.ico">
+
+
+<link rel="alternate" type="application/rss+xml" title="RSS" href="https://axelknauf.github.io//index.xml">
+
+
+<div class="container">
+    <header class="nav">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="https://axelknauf.github.io/">Knowledge Base</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="https://axelknauf.github.io//post">All Posts</a></li>
+                        <li><a href="https://axelknauf.github.io//tags">Tags</a></li>
+                        
+                        <li><a href="https://axelknauf.github.io/about/">About</a></li>
+                        
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        
+                        
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+<div class="row">
+    <div class="col-md-8">
+        <article class="post">
+
+            <header>
+                <div class="post-date">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                    <time datetime="Jan 12 2016">
+                        Jan 12 2016
+                    </time>
+                </div>
+                <h1 class="post-title">
+                    <a href="https://axelknauf.github.io/post/linux-apache-ssl-howto/">Linux: Self-signed certificate for Apache SSL</a>
+                </h1>
+            </header>
+
+            <div class="post-content">
+                
+
+<p>This article details how to generate an SSL certificate in order to encrypt traffic on an Aache hosted site using HTTPS. The certificate will be self-signed, meaning browsers will still show a warning message when accessing the page.</p>
+
+<p>This setup is not secure and all code is given as examples only. It is intended for development purposes only. If you want to run your site encrypted with a real certificate, you may want to take a look at <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>.</p>
+
+<h1 id="assumptions:48b258d84d4d84091e255ea9222b6ec0">Assumptions</h1>
+
+<p>This guide refers to Apache 2.2 using OpenSSL to generate the certificate - the same can be achieved for later versions of Apache or even using OpenSSL on Cygwin on Windows.</p>
+
+<ul>
+<li>Apache 2.2 with mod_ssl support</li>
+<li>OpenSSL already installed (<code>sudo apt-get install openssl</code>)</li>
+<li>Editor and browser for testing and configuration</li>
+</ul>
+
+<p>I am assuming that you are using the domaim &ldquo;www.example.com&rdquo; for your virtual host. This becomes relevant for the &ldquo;Common Name&rdquo; (CN) in the certificate signing request (CSR) below. Please adust this where needed.</p>
+
+<h1 id="how-to-create-a-new-certificate:48b258d84d4d84091e255ea9222b6ec0">How to create a new certificate</h1>
+
+<p>On all prompts you can easily press return to use the default setting, unless I am giving other instructions.</p>
+
+<p>These steps are necessary:</p>
+
+<h2 id="create-folder-and-certification-authority-ca:48b258d84d4d84091e255ea9222b6ec0">Create folder and Certification Authority (CA)</h2>
+
+<p>I am using a subfolder inside Apaches <code>conf</code> folder which allows easy configuration from <code>httpd.conf</code>.</p>
+
+<pre><code>    $ cd $APACHE_HOME/conf
+    $ mkdir certs
+    $ cd certs
+    $ /usr/ssl/misc/CA.pl -newca
+</code></pre>
+
+<p>Passphrase: &ldquo;example&rdquo;</p>
+
+<p>Common name: &ldquo;my-example-ca&rdquo;</p>
+
+<h2 id="create-server-key:48b258d84d4d84091e255ea9222b6ec0">Create server key</h2>
+
+<pre><code>    $ openssl genrsa -des3 -out www.example.com.pem 2048
+</code></pre>
+
+<p>Passphrase: &ldquo;example&rdquo;</p>
+
+<h2 id="create-certificate-signing-request-csr:48b258d84d4d84091e255ea9222b6ec0">Create Certificate Signing Request (CSR)</h2>
+
+<p>Using the newly generated server key above.</p>
+
+<pre><code>    $ openssl req -new -key www.example.com.pem -out www.example.com.csr
+</code></pre>
+
+<p>Common Name &ldquo;www.example.com&rdquo;, it must match the domain name of your virtual host!</p>
+
+<h2 id="create-signed-certificate-using-ca-and-csr:48b258d84d4d84091e255ea9222b6ec0">Create signed certificate using CA and CSR</h2>
+
+<pre><code>    $ openssl ca -in www.example.com.csr -out www.example.com-cert.pem
+</code></pre>
+
+<h2 id="remove-passphrase-from-server-key:48b258d84d4d84091e255ea9222b6ec0">Remove passphrase from server key</h2>
+
+<p>Since Apache does not support passphrases for server keys (on Windows at least), we have to remove any passphrase used above.</p>
+
+<pre><code>    $ openssl rsa -in www.example.com.pem -out www.example.com-nopassphrase.pem
+</code></pre>
+
+<h2 id="configure-apache:48b258d84d4d84091e255ea9222b6ec0">Configure Apache</h2>
+
+<h3 id="edit-httpd-conf:48b258d84d4d84091e255ea9222b6ec0">Edit <code>httpd.conf</code></h3>
+
+<ul>
+<li>Uncomment &ldquo;LoadModule ssl_module&rdquo; directive</li>
+<li>Uncomment include for <code>httpd-ssl.conf</code></li>
+</ul>
+
+<h3 id="edit-extra-httpd-ssl-conf:48b258d84d4d84091e255ea9222b6ec0">Edit <code>extra/httpd-ssl.conf</code></h3>
+
+<h4 id="general-settings:48b258d84d4d84091e255ea9222b6ec0">General settings</h4>
+
+<pre><code>        Listen 443
+        AddType application/x-x509-ca-cert .crt
+        AddType application/x-pkcs7-crl    .crl
+        SSLPassPhraseDialog  builtin
+        SSLSessionCache        &quot;shmcb:/path/to/apache/logs/ssl_scache(512000)&quot;
+        SSLSessionCacheTimeout  300
+        SSLMutex default
+</code></pre>
+
+<p>You will have to adjust the path to your Apache installation.</p>
+
+<h4 id="create-virtualhost-for-ssl:48b258d84d4d84091e255ea9222b6ec0">Create VirtualHost for SSL</h4>
+
+<pre><code>        NameVirtualHost www.example.com:443
+        &lt;VirtualHost www.example.com:443&gt;
+
+           ServerName www.example.com:443
+           ServerAdmin root@localhost
+
+           [..]
+
+           SSLEngine on
+           SSLProxyEngine On
+           SSLProtocol all -SSLv2
+           SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
+           SSLCertificateFile &quot;/path/to/apache/conf/certs/www.example.com-cert.pem&quot;
+           SSLCertificateKeyFile &quot;/path/to/apache/conf/certs/www.example.com-nopassphrase.pem&quot;
+
+           [..]
+
+        &lt;/VirtualHost&gt;
+</code></pre>
+
+<p>You have to adjust the paths for the Apache installation and both &ldquo;SSLCertificateFile&rdquo; and &ldquo;SSLCertificateKeyFile&rdquo;. In addition, you have to adjust the hostname, of course.</p>
+
+<h4 id="restart-apache:48b258d84d4d84091e255ea9222b6ec0">Restart Apache</h4>
+
+<p>Then, try <a href="https://www.example.com/">https://www.example.com/</a></p>
+
+<h1 id="renew-an-existing-certificate:48b258d84d4d84091e255ea9222b6ec0">Renew an existing certificate</h1>
+
+<p>If the certifcate expired (usually it is valid for a single year), it can be renewed using the following steps. We are using the same tools as above, and the examples assume you are in the &ldquo;certs&rdquo; folder of your Apache configuration.</p>
+
+<h2 id="remove-old-certifcate-from-store:48b258d84d4d84091e255ea9222b6ec0">Remove old certifcate from store</h2>
+
+<p>Find out the ID of the current certifcate, it is part of <code>demoCA/index.txt</code> with your Common Name (above: &ldquo;www.example.com&rdquo;):</p>
+
+<pre><code>    $ less demoCA/index.txt
+    V       171207033254Z           CC61BF56E46A51BE        unknown /C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=my-example-ca
+    V       151208033429Z           CC61BF56E46A51BF        unknown /C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.com    &lt;-------------- 
+</code></pre>
+
+<p>In this case it is the second one, the common name is at the very end and we note the ID &ldquo;CC61BF56E46A51BF&rdquo; (third column). There if a file with this ID as name in the <code>newcerts</code> folder:</p>
+
+<pre><code>    $ ls -l demoCA/newcerts
+    ..
+    -rw-r--r-- 1 user group 2999  8. Dez 2014  CC61BF56E46A51BE.pem
+    -rw-r--r-- 1 user group 3891  8. Dez 2014  CC61BF56E46A51BF.pem   &lt;------------ 
+</code></pre>
+
+<p>When we have the file, we can revoke the certifcate using the passphrase from above:</p>
+
+<pre><code>    $ openssl ca -revoke demoCA/newcerts/CC61BF56E46A51BF.pem
+    Using configuration from /usr/ssl/openssl.cnf
+    Enter pass phrase for ./demoCA/private/cakey.pem:
+    Revoking Certificate CC61BF56E46A51BF.
+    Data Base Updated
+</code></pre>
+
+<h2 id="create-a-new-certificate:48b258d84d4d84091e255ea9222b6ec0">Create a new certificate</h2>
+
+<p>Afterwards a new one can be generated using the existing CSR from the initial creation. If you do not have this file anymore, you can follow the steps above to create a new one.</p>
+
+<pre><code>    $ openssl ca -in www.example.com.csr -out www.example.com-cert.pem
+</code></pre>
+
+<p>If you want to use this new certificate in Apache, you will have to remove the passphrase again. Afterwards, place the new certificate file in the Apache config folder and restart the server.</p>
+
+<h1 id="links-and-documentation:48b258d84d4d84091e255ea9222b6ec0">Links and Documentation</h1>
+
+<ul>
+<li>Official Apache 2.2 SSL docs: <a href="http://httpd.apache.org/docs/2.2/en/ssl/">http://httpd.apache.org/docs/2.2/en/ssl/</a></li>
+<li>Let&rsquo;s Encrypt open CA: <a href="https://letsencrypt.org/">https://letsencrypt.org/</a></li>
+<li>OpenSSL 1.0.2 man page: <a href="https://www.openssl.org/docs/man1.0.2/apps/openssl.html">https://www.openssl.org/docs/man1.0.2/apps/openssl.html</a></li>
+</ul>
+
+            </div>
+
+            <aside>
+                
+                <ul class="list-inline post-tags">
+                    
+                    <li>
+                        <a href="https://axelknauf.github.io//tags/linux">
+                            <i class="fa fa-tags"></i>
+                            linux
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://axelknauf.github.io//tags/apache">
+                            <i class="fa fa-tags"></i>
+                            apache
+                        </a>
+                    </li>
+                    
+                </ul>
+
+                
+            
+            <footer>
+
+                <nav>
+                    <ul class="pager">
+
+                        
+                        <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Older</a></li>
+                        
+
+                        <li><a href="https://axelknauf.github.io//post">All Posts</a></li>
+
+                        
+                        <li class="next"><a href="https://axelknauf.github.io/post/linux-unison-synchronization/">Newer <span aria-hidden="true">&rarr;</span></a></li>
+                        
+
+                    </ul>
+                </nav>
+
+                
+            </footer>
+
+        </article>
+    </div>
+    <div class="col-md-4">
+        
+<aside>
+    <div class="row">
+
+        <div class="col-xs-12 col-sm-4 col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Recent Posts</h2>
+                </div>
+                <div class="list-group">
+                    
+                    <a href="/post/linux-apache-ssl-howto/" class="list-group-item">Linux: Self-signed certificate for Apache SSL</a>
+                    
+                    <a href="/post/linux-unison-synchronization/" class="list-group-item">Linux: Keeping files in sync with unison</a>
+                    
+                    <a href="/post/java-throttling-exception-limit/" class="list-group-item">Java: Dynamic Event Throttling</a>
+                    
+                    <a href="/post/git-svn/" class="list-group-item">Using Git as SVN Client</a>
+                    
+                    <a href="/post/oracle-admin-snippets/" class="list-group-item">Oracle Administration Snippets</a>
+                    
+                    <a href="/post/linux-filesystem-snippets/" class="list-group-item">Linux Snippets</a>
+                    
+                    <a href="/post/xps13-9343/" class="list-group-item">Linux: Dell XPS 13 9343</a>
+                    
+                    <a href="/about/" class="list-group-item">About</a>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-4 col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Tags</h2>
+                </div>
+                <div class="list-group">
+                    
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/algorithm" class="list-group-item">
+                        <span class="badge">1</span>
+                        algorithm
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/apache" class="list-group-item">
+                        <span class="badge">1</span>
+                        apache
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/dba" class="list-group-item">
+                        <span class="badge">1</span>
+                        dba
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/git" class="list-group-item">
+                        <span class="badge">1</span>
+                        git
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/java" class="list-group-item">
+                        <span class="badge">1</span>
+                        java
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/linux" class="list-group-item">
+                        <span class="badge">4</span>
+                        linux
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/oracle" class="list-group-item">
+                        <span class="badge">1</span>
+                        oracle
+                    </a>
+                    
+                    
+                    <a href="https://axelknauf.github.io//tags/svn" class="list-group-item">
+                        <span class="badge">1</span>
+                        svn
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+</aside>
+
+    </div>
+</div>
+
+</div>
+<hr>
+
+<footer class="container copy">
+    <p>&copy; 2016  Axel Knauf </p>
+	<p>Powered by <a href="http://gohugo.io" target="_blank">Hugo</a>, theme adapted from <a href="https://github.com/dim0627/hugo_theme_beg" target="_blank">beg</a> designed by <a href="https://twitter.com/dim0627" target="_blank">Daisuke Tsuji</a></p>
+</footer>
+
+<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+document.write('<script src="//sharebutton.net/plugin/sharebutton.php?type=horizontal&u=' + encodeURIComponent(document.location.href) + '"></scr' + 'ipt>');
+</script>
+

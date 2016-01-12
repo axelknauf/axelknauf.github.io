@@ -5,13 +5,188 @@
     <link>https://axelknauf.github.io/tags/linux/</link>
     <language>en-us</language>
     <author>Axel Knauf</author>
-    <rights>(C) 2015</rights>
-    <updated>2015-12-27 11:53:23 &#43;0100 CET</updated>
+    <rights>(C) 2016</rights>
+    <updated>2016-01-12 16:30:58 &#43;0100 CET</updated>
 
     
       
         <item>
-          <title>Linux: keeping files in sync with unison</title>
+          <title>Linux: Self-signed certificate for Apache SSL</title>
+          <link>https://axelknauf.github.io/post/linux-apache-ssl-howto/</link>
+          <pubDate>Tue, 12 Jan 2016 16:30:58 CET</pubDate>
+          <author>Axel Knauf</author>
+          <guid>https://axelknauf.github.io/post/linux-apache-ssl-howto/</guid>
+          <description>
+
+&lt;p&gt;This article details how to generate an SSL certificate in order to encrypt traffic on an Aache hosted site using HTTPS. The certificate will be self-signed, meaning browsers will still show a warning message when accessing the page.&lt;/p&gt;
+
+&lt;p&gt;This setup is not secure and all code is given as examples only. It is intended for development purposes only. If you want to run your site encrypted with a real certificate, you may want to take a look at &lt;a href=&#34;https://letsencrypt.org/&#34;&gt;Let&amp;rsquo;s Encrypt&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;assumptions:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Assumptions&lt;/h1&gt;
+
+&lt;p&gt;This guide refers to Apache 2.2 using OpenSSL to generate the certificate - the same can be achieved for later versions of Apache or even using OpenSSL on Cygwin on Windows.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Apache 2.2 with mod_ssl support&lt;/li&gt;
+&lt;li&gt;OpenSSL already installed (&lt;code&gt;sudo apt-get install openssl&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Editor and browser for testing and configuration&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I am assuming that you are using the domaim &amp;ldquo;www.example.com&amp;rdquo; for your virtual host. This becomes relevant for the &amp;ldquo;Common Name&amp;rdquo; (CN) in the certificate signing request (CSR) below. Please adust this where needed.&lt;/p&gt;
+
+&lt;h1 id=&#34;how-to-create-a-new-certificate:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;How to create a new certificate&lt;/h1&gt;
+
+&lt;p&gt;On all prompts you can easily press return to use the default setting, unless I am giving other instructions.&lt;/p&gt;
+
+&lt;p&gt;These steps are necessary:&lt;/p&gt;
+
+&lt;h2 id=&#34;create-folder-and-certification-authority-ca:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Create folder and Certification Authority (CA)&lt;/h2&gt;
+
+&lt;p&gt;I am using a subfolder inside Apaches &lt;code&gt;conf&lt;/code&gt; folder which allows easy configuration from &lt;code&gt;httpd.conf&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ cd $APACHE_HOME/conf
+    $ mkdir certs
+    $ cd certs
+    $ /usr/ssl/misc/CA.pl -newca
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Passphrase: &amp;ldquo;example&amp;rdquo;&lt;/p&gt;
+
+&lt;p&gt;Common name: &amp;ldquo;my-example-ca&amp;rdquo;&lt;/p&gt;
+
+&lt;h2 id=&#34;create-server-key:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Create server key&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ openssl genrsa -des3 -out www.example.com.pem 2048
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Passphrase: &amp;ldquo;example&amp;rdquo;&lt;/p&gt;
+
+&lt;h2 id=&#34;create-certificate-signing-request-csr:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Create Certificate Signing Request (CSR)&lt;/h2&gt;
+
+&lt;p&gt;Using the newly generated server key above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ openssl req -new -key www.example.com.pem -out www.example.com.csr
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Common Name &amp;ldquo;www.example.com&amp;rdquo;, it must match the domain name of your virtual host!&lt;/p&gt;
+
+&lt;h2 id=&#34;create-signed-certificate-using-ca-and-csr:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Create signed certificate using CA and CSR&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ openssl ca -in www.example.com.csr -out www.example.com-cert.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;remove-passphrase-from-server-key:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Remove passphrase from server key&lt;/h2&gt;
+
+&lt;p&gt;Since Apache does not support passphrases for server keys (on Windows at least), we have to remove any passphrase used above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ openssl rsa -in www.example.com.pem -out www.example.com-nopassphrase.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;configure-apache:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Configure Apache&lt;/h2&gt;
+
+&lt;h3 id=&#34;edit-httpd-conf:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Edit &lt;code&gt;httpd.conf&lt;/code&gt;&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Uncomment &amp;ldquo;LoadModule ssl_module&amp;rdquo; directive&lt;/li&gt;
+&lt;li&gt;Uncomment include for &lt;code&gt;httpd-ssl.conf&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;edit-extra-httpd-ssl-conf:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Edit &lt;code&gt;extra/httpd-ssl.conf&lt;/code&gt;&lt;/h3&gt;
+
+&lt;h4 id=&#34;general-settings:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;General settings&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;        Listen 443
+        AddType application/x-x509-ca-cert .crt
+        AddType application/x-pkcs7-crl    .crl
+        SSLPassPhraseDialog  builtin
+        SSLSessionCache        &amp;quot;shmcb:/path/to/apache/logs/ssl_scache(512000)&amp;quot;
+        SSLSessionCacheTimeout  300
+        SSLMutex default
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You will have to adjust the path to your Apache installation.&lt;/p&gt;
+
+&lt;h4 id=&#34;create-virtualhost-for-ssl:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Create VirtualHost for SSL&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;        NameVirtualHost www.example.com:443
+        &amp;lt;VirtualHost www.example.com:443&amp;gt;
+
+           ServerName www.example.com:443
+           ServerAdmin root@localhost
+
+           [..]
+
+           SSLEngine on
+           SSLProxyEngine On
+           SSLProtocol all -SSLv2
+           SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
+           SSLCertificateFile &amp;quot;/path/to/apache/conf/certs/www.example.com-cert.pem&amp;quot;
+           SSLCertificateKeyFile &amp;quot;/path/to/apache/conf/certs/www.example.com-nopassphrase.pem&amp;quot;
+
+           [..]
+
+        &amp;lt;/VirtualHost&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You have to adjust the paths for the Apache installation and both &amp;ldquo;SSLCertificateFile&amp;rdquo; and &amp;ldquo;SSLCertificateKeyFile&amp;rdquo;. In addition, you have to adjust the hostname, of course.&lt;/p&gt;
+
+&lt;h4 id=&#34;restart-apache:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Restart Apache&lt;/h4&gt;
+
+&lt;p&gt;Then, try &lt;a href=&#34;https://www.example.com/&#34;&gt;https://www.example.com/&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;renew-an-existing-certificate:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Renew an existing certificate&lt;/h1&gt;
+
+&lt;p&gt;If the certifcate expired (usually it is valid for a single year), it can be renewed using the following steps. We are using the same tools as above, and the examples assume you are in the &amp;ldquo;certs&amp;rdquo; folder of your Apache configuration.&lt;/p&gt;
+
+&lt;h2 id=&#34;remove-old-certifcate-from-store:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Remove old certifcate from store&lt;/h2&gt;
+
+&lt;p&gt;Find out the ID of the current certifcate, it is part of &lt;code&gt;demoCA/index.txt&lt;/code&gt; with your Common Name (above: &amp;ldquo;www.example.com&amp;rdquo;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ less demoCA/index.txt
+    V       171207033254Z           CC61BF56E46A51BE        unknown /C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=my-example-ca
+    V       151208033429Z           CC61BF56E46A51BF        unknown /C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.com    &amp;lt;-------------- 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In this case it is the second one, the common name is at the very end and we note the ID &amp;ldquo;CC61BF56E46A51BF&amp;rdquo; (third column). There if a file with this ID as name in the &lt;code&gt;newcerts&lt;/code&gt; folder:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ ls -l demoCA/newcerts
+    ..
+    -rw-r--r-- 1 user group 2999  8. Dez 2014  CC61BF56E46A51BE.pem
+    -rw-r--r-- 1 user group 3891  8. Dez 2014  CC61BF56E46A51BF.pem   &amp;lt;------------ 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When we have the file, we can revoke the certifcate using the passphrase from above:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ openssl ca -revoke demoCA/newcerts/CC61BF56E46A51BF.pem
+    Using configuration from /usr/ssl/openssl.cnf
+    Enter pass phrase for ./demoCA/private/cakey.pem:
+    Revoking Certificate CC61BF56E46A51BF.
+    Data Base Updated
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;create-a-new-certificate:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Create a new certificate&lt;/h2&gt;
+
+&lt;p&gt;Afterwards a new one can be generated using the existing CSR from the initial creation. If you do not have this file anymore, you can follow the steps above to create a new one.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ openssl ca -in www.example.com.csr -out www.example.com-cert.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you want to use this new certificate in Apache, you will have to remove the passphrase again. Afterwards, place the new certificate file in the Apache config folder and restart the server.&lt;/p&gt;
+
+&lt;h1 id=&#34;links-and-documentation:48b258d84d4d84091e255ea9222b6ec0&#34;&gt;Links and Documentation&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Official Apache 2.2 SSL docs: &lt;a href=&#34;http://httpd.apache.org/docs/2.2/en/ssl/&#34;&gt;http://httpd.apache.org/docs/2.2/en/ssl/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Let&amp;rsquo;s Encrypt open CA: &lt;a href=&#34;https://letsencrypt.org/&#34;&gt;https://letsencrypt.org/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;OpenSSL 1.0.2 man page: &lt;a href=&#34;https://www.openssl.org/docs/man1.0.2/apps/openssl.html&#34;&gt;https://www.openssl.org/docs/man1.0.2/apps/openssl.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+      
+    
+      
+        <item>
+          <title>Linux: Keeping files in sync with unison</title>
           <link>https://axelknauf.github.io/post/linux-unison-synchronization/</link>
           <pubDate>Sun, 27 Dec 2015 11:53:23 CET</pubDate>
           <author>Axel Knauf</author>
