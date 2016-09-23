@@ -1,0 +1,21 @@
+# Theme customization - please change from the defaults!
+
+# Color for top bar, links, etc
+highlight_color: '#439c7a'
+
+# Profile links on the left sidebar, leave blank to ignore
+social:
+  github: axelknauf
+  twitter: kopfkind
+  gravatar: 767c1edcaf10e08775644927f3e0a488
+
+# "Hi, I'm _______"
+name: Axel Knauf
+email: kopfkind@posteo.de
+tagline: "Collected digital wisdom"
+
+# Toggle "Postings are my own" disclaimer in footer
+show_disclaimer: false
+
+# Toggle link/icon to view atom feed (/atom.xml) in sidebar
+show_atom_feed: false
