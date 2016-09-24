@@ -152,6 +152,7 @@ If you want to use this new certificate in Apache, you will have to remove the p
 
 # Links and Documentation
 
-* Official Apache 2.2 SSL docs: http://httpd.apache.org/docs/2.2/en/ssl/
-* Let's Encrypt open CA: https://letsencrypt.org/
-* OpenSSL 1.0.2 man page: https://www.openssl.org/docs/man1.0.2/apps/openssl.html
+* Official Apache 2.2 SSL docs: [http://httpd.apache.org/docs/2.2/en/ssl/](http://httpd.apache.org/docs/2.2/en/ssl/)
+* Let's Encrypt open CA: [https://letsencrypt.org/](https://letsencrypt.org/)
+* OpenSSL 1.0.2 man page: [https://www.openssl.org/docs/man1.0.2/apps/openssl.html](https://www.openssl.org/docs/man1.0.2/apps/openssl.html)
+

@@ -86,7 +86,7 @@ I hope this guide was useful. Happy hacking!
 
 ## Links and docs
 
-* Official homepage: http://www.cis.upenn.edu/~bcpierce/unison/docs.html
-* Documentation below: http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html
+* Official homepage: [http://www.cis.upenn.edu/~bcpierce/unison/docs.html](http://www.cis.upenn.edu/~bcpierce/unison/docs.html)
+* Documentation below: [http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html](http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html)
 
 

@@ -91,7 +91,7 @@ If you want to merge commits or fixes between SVN branches, you can use `git che
 
 ## Links
 
-* Official docs: https://git-scm.com/docs/git-svn
-* Useful StackOverflow answer: https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn
+* Official docs: [https://git-scm.com/docs/git-svn](https://git-scm.com/docs/git-svn)
+* Useful StackOverflow answer: [https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn](https://stackoverflow.com/questions/3239759/checkout-remote-branch-using-git-svn)
 
 
