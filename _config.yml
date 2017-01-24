@@ -19,7 +19,7 @@ description: > # this means to ignore newlines until "baseurl:"
   Collected digital wisdom, mainly development, Linux and other stuff from that 
   area of expertise. 
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://axelknauf.github.io" # the base hostname & protocol for your site
+url: "http://www.axelknauf.de" # the base hostname & protocol for your site
 twitter_username: kopfkind
 github_username:  axelknauf
 repository: "axelknauf/axelknauf.github.io"
